@@ -1,0 +1,6 @@
+# generated preview images -- regenerate with:
+#   python3 tools/gen_scene.py --png
+#   python3 tools/gen_anim.py --contact
+tools/*.png
+__pycache__/
+*.pyc
