@@ -214,6 +214,31 @@ body:has(.slot:not([hidden])){overflow:hidden}
 /* the skate park fills the screen; the same park at night during bonuses */
 .scene{position:absolute;inset:0;z-index:0;background:#7FD3FF url("scene-day.svg") center bottom/cover no-repeat;image-rendering:pixelated;image-rendering:crisp-edges}
 .slot:has(.stage.bonus) .scene{background:#1a0b33 url("scene-night.svg") center bottom/cover no-repeat}
+/* ---- animated 8-bit skaters layered over the park backdrop ---- */
+.sklayer{position:absolute;pointer-events:none;overflow:hidden}
+.sk{position:absolute;width:10.625%;height:17.778%;background-repeat:no-repeat;
+  background-size:3200% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
+@keyframes skframes{from{background-position-x:0%}to{background-position-x:100%}}
+#skStreet{background-image:url("skater-street.png");top:66.11%;
+  animation:skframes 4s steps(32) infinite, pathStreet 13s linear infinite}
+@keyframes pathStreet{from{left:-12.81%}to{left:102.19%}}
+#skBowl{background-image:url("skater-bowl.png");
+  animation:skframes 4s steps(32) infinite, pathBowl 4s linear infinite}
+@keyframes pathBowl{
+  0%{left:20.94%;top:76.11%} 20%{left:10.94%;top:70.00%} 36%{left:4.06%;top:62.78%}
+  50%{left:2.81%;top:60.56%} 64%{left:4.06%;top:63.89%} 82%{left:12.19%;top:71.11%}
+  100%{left:20.94%;top:76.11%}}
+#skRail{background-image:url("skater-rail.png");
+  animation:skframes 4s steps(32) infinite, pathRail 4s linear infinite}
+@keyframes pathRail{
+  0%{left:91.56%;top:68.33%;opacity:0} 6%{opacity:1}
+  14%{left:88.44%;top:66.11%} 22%{left:87.19%;top:63.89%} 30%{left:85.94%;top:55.00%}
+  38%{left:85.31%;top:51.67%} 56%{left:79.69%;top:59.44%} 72%{left:73.44%;top:68.33%}
+  80%{left:70.94%;top:70.56%} 88%{left:68.44%;top:75.00%;opacity:1}
+  100%{left:65.94%;top:77.22%;opacity:0}}
+.slot:has(.stage.bonus) .sk{filter:brightness(.6) saturate(.85) hue-rotate(-10deg)}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}}
+
 .slotbar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0))}
 .brand{font-family:var(--f-d);font-size:clamp(14px,3.2vw,22px);color:#fff;text-shadow:3px 3px 0 #000,-1px -1px 0 #000;letter-spacing:.04em}
 .barspacer{width:180px}
@@ -452,7 +477,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"></div>
+    <div class="scene" aria-hidden="true"><div class="sklayer" id="sklayer"><div class="sk" id="skStreet"></div><div class="sk" id="skBowl"></div><div class="sk" id="skRail"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3510,6 +3535,25 @@ else { $('msg').textContent = 'Connecting to the casino...'; $('spinbtn').disabl
 })(typeof window !== 'undefined' ? window : this);
 
 try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
+</script>
+<script>
+/* Size the skater layer exactly like the park backdrop's `cover` sizing
+   (16:9, centred horizontally, anchored to the bottom) so the sprites stay
+   locked to the bowl, the rail and the flat at every window size. */
+(function(){
+  var scene = document.querySelector('.scene'), layer = document.getElementById('sklayer');
+  if (!scene || !layer) return;
+  function fit(){
+    var w = scene.clientWidth, h = scene.clientHeight, ar = 16/9, lw, lh;
+    if (!w || !h) return;
+    if (w/h > ar){ lw = w; lh = w/ar; } else { lh = h; lw = h*ar; }
+    layer.style.width = lw+'px'; layer.style.height = lh+'px';
+    layer.style.left = ((w-lw)/2)+'px'; layer.style.top = (h-lh)+'px';
+  }
+  fit();
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(scene);
+  addEventListener('resize', fit);
+})();
 </script>
 </body>
 </html>

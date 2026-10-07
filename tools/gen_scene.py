@@ -763,64 +763,8 @@ def build(night=False):
     c.rect(119, 77, 56, 12, hx('#ff2fb0'))
     text(c, 124, 79, 'SK8 SESH', hx('#ffffff'), px=1, ink=None)
 
-    # ---------------- skaters ---------------------------------------------
-    # The reel stage sits over the middle of the viewport, so the headline
-    # tricks live in the left and right thirds and along the bottom edge.
-
-    # LEFT -- quarter pipe + bowl
-    # girl catching air over the coping, grabbing melon
-    skater(c, 76, 104, POSE_AIR,
-           pal_of(skin=1, hair=3, shirt=7, pants=2, deck=3, style='long'), flip=True)
-    # girl waiting on the deck with her board stood on its tail
-    skater(c, 96, 112, POSE_STAND,
-           pal_of(skin=3, hair=0, shirt=1, pants=0, deck=1, style='bun'), flip=True)
-    # guy carving the near wall of the bowl
-    skater(c, 52, 154, POSE_CARVE,
-           pal_of(skin=0, hair=1, shirt=5, pants=3, deck=2, style='helmet', accent='#ffd21f'))
-    # guy holding a nose manual across the foreground flat
-    skater(c, 104, 179, POSE_MANUAL,
-           pal_of(skin=2, hair=0, shirt=3, pants=5, deck=5, style='cap', accent='#3ddc84'),
-           shadow=180)
-    # girl watching from the fence line
-    skater(c, 16, 130, POSE_WATCH,
-           pal_of(skin=1, hair=0, shirt=2, pants=7, deck=0, style='ponytail'), shadow=131)
-
-    # RIGHT -- stair set, hubba and the flat rail
-    # guy kickflipping out over the stair set
-    skater(c, 240, 130, POSE_FLIP,
-           pal_of(skin=0, hair=4, shirt=2, pants=0, deck=5, style='cap', accent='#ff2fb0'),
-           flip=True)
-    # girl locked into a 50-50 down the handrail
-    rt = .52
-    skater(c, RAIL_A[0] + (RAIL_B[0] - RAIL_A[0]) * rt,
-           RAIL_A[1] + (RAIL_B[1] - RAIL_A[1]) * rt - 1, POSE_GRIND,
-           pal_of(skin=2, hair=2, shirt=3, pants=5, deck=2, style='ponytail'),
-           flip=True, board_ang=RAIL_ANG)
-    # girl locked into a 50-50 on the front flat rail
-    skater(c, 192, 168, POSE_GRIND,
-           pal_of(skin=1, hair=3, shirt=7, pants=2, deck=1, style='long'), flip=True)
-    # guy ollieing clean off the bottom step
-    skater(c, 222, 152, POSE_OLLIE,
-           pal_of(skin=1, hair=0, shirt=4, pants=0, deck=0, style='beanie', accent='#19c7c7'),
-           flip=True)
-    # guy filming the rail line, crouched low
-    skater(c, 264, 168, POSE_FILM,
-           pal_of(skin=0, hair=1, shirt=6, pants=1, deck=0, style='cap', accent='#2d6cdf'),
-           shadow=169)
-    c.rect(270, 152, 7, 5, OUT); c.rect(271, 153, 5, 3, hx('#2b2840'))
-    c.rect(277, 153, 2, 3, hx('#19c7c7'))
-
-    # CENTRE BACK -- crew on the funbox, small and mostly behind the stage
-    skater(c, 152, 122, POSE_SIT,
-           pal_of(skin=2, hair=0, shirt=5, pants=0, deck=0, style='long'))
-    skater(c, 166, 122, POSE_CHEER,
-           pal_of(skin=0, hair=2, shirt=3, pants=6, deck=0, style='short'), flip=True)
-    skater(c, 192, 122, POSE_PUSH,
-           pal_of(skin=3, hair=4, shirt=1, pants=1, deck=4, style='short'))
-    skater(c, 214, 127, POSE_WATCH,
-           pal_of(skin=3, hair=4, shirt=4, pants=7, deck=0, style='beanie', accent='#ff2fb0'),
-           flip=True, shadow=128)
-
+    # Skaters are no longer drawn into the park: they are animated sprite
+    # sheets (tools/gen_anim.py) layered over this backdrop by the page.
 
     # ---------------- night lighting pass ---------------------------------
     if night:
