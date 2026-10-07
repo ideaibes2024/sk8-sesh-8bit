@@ -251,13 +251,13 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .clouds{position:absolute;left:0;right:0;top:0;height:46%;
   background-image:url("cloud-strip.png");background-repeat:repeat-x;
   background-size:auto 100%;image-rendering:pixelated}
-#clouds1{animation:drift1 90s linear infinite;opacity:.95}
-#clouds2{top:8%;height:34%;animation:drift2 150s linear infinite;opacity:.6;
-  transform:scaleY(.8)}
+#clouds1{animation:drift1 90s linear infinite, cloudfade 180s linear infinite;opacity:.95}
+#clouds2{top:8%;height:34%;opacity:.6;transform:scaleY(.8);
+  animation:drift2 150s linear infinite, cloudfade 180s linear infinite}
 @keyframes drift1{from{background-position-x:0}to{background-position-x:-1600px}}
 @keyframes drift2{from{background-position-x:0}to{background-position-x:1600px}}
-/* clouds fade out at night and come back at dawn */
-.clouds{animation-name:drift1,cloudfade}
+/* clouds dim at night and come back at dawn (declared on the ids above,
+   since an id rule's animation shorthand would override a class one) */
 @keyframes cloudfade{
   0%,30%{filter:none}
   40%{filter:brightness(.8) saturate(.7)}
