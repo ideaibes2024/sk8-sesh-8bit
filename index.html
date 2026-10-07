@@ -267,15 +267,27 @@ body:has(.slot:not([hidden])){overflow:hidden}
 
 /* the park itself, drawn with a transparent sky so all of that shows through */
 .park{position:absolute;inset:0;
-  background:url("park-day.svg") center bottom/cover no-repeat}
+  background:url("park-day.svg") center bottom/cover no-repeat;
+  animation:litcycle 180s linear infinite}
+/* the ground has to follow the sky, or the concrete glows at midnight */
+@keyframes litcycle{
+  0%,22%{filter:none}
+  34%{filter:brightness(.88) saturate(1.1) hue-rotate(-8deg)}   /* sunset warmth */
+  44%{filter:brightness(.62) saturate(.85) hue-rotate(-14deg)}
+  54%,70%{filter:brightness(.42) saturate(.65) hue-rotate(-18deg)}  /* night */
+  82%{filter:brightness(.68) saturate(.9) hue-rotate(-10deg)}   /* dawn */
+  92%{filter:brightness(.92) saturate(1)}
+  100%{filter:none}}
+.sklayer{animation:litcycle 180s linear infinite}
 .slot:has(.stage.bonus) .park{background-image:url("park-night.svg")}
 /* the bonus round pins the sky to night */
 .slot:has(.stage.bonus) .sky{animation:none;background:linear-gradient(#140826,#2a0f47 55%,#45155f)}
 .slot:has(.stage.bonus) #sun{opacity:0;animation:none}
 .slot:has(.stage.bonus) #moon{animation:none;opacity:1;left:46%;top:6%}
 .slot:has(.stage.bonus) .clouds{animation:none;filter:brightness(.35) saturate(.3)}
+.slot:has(.stage.bonus) .park,.slot:has(.stage.bonus) .sklayer{animation:none;filter:none}
 @media (prefers-reduced-motion: reduce){
-  .sky,.orb,.clouds{animation:none}}
+  .sky,.orb,.clouds,.park,.sklayer{animation:none}}
 
 /* ---- stick-figure skaters riding the park backdrop ---- */
 /* Square boxes: Sk8Anim draws into a 100x100 viewBox with the board line
