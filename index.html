@@ -278,16 +278,41 @@ body:has(.slot:not([hidden])){overflow:hidden}
   82%{filter:brightness(.68) saturate(.9) hue-rotate(-10deg)}   /* dawn */
   92%{filter:brightness(.92) saturate(1)}
   100%{filter:none}}
-.sklayer{animation:litcycle 180s linear infinite}
+#sklayer{animation:litcycle 180s linear infinite}
+
+/* --- floodlight towers switch on at dusk --- */
+/* #fxlayer sits above .park and below .sklayer, and deliberately carries
+   no litcycle filter -- light sources must not be dimmed by nightfall. */
+.lampglow,.lamppool,.lampbar{position:absolute;opacity:0;
+  animation:lampcycle 180s linear infinite}
+.lampglow{width:31.25%;height:55.56%;top:-10.56%;
+  background:radial-gradient(closest-side,rgba(255,228,150,.55),rgba(255,214,120,.18) 45%,transparent 72%)}
+.lamppool{width:28.75%;height:24.44%;top:71.11%;
+  background:radial-gradient(closest-side,rgba(255,228,150,.30),transparent 75%)}
+.lampbar{width:5.94%;height:5.00%;top:14.44%;background:#fff6cf;
+  box-shadow:0 0 0 1px #141414}
+#glowL,#poolL{left:calc(10.63% - 15.63%)}
+#glowR{left:calc(89.38% - 15.63%)}
+#poolR{left:calc(89.38% - 14.38%)}
+#poolL{left:calc(10.63% - 14.38%)}
+#barL{left:7.81%}  #barR{left:86.56%}
+@keyframes lampcycle{
+  0%,28%{opacity:0}  40%{opacity:.55}  54%,70%{opacity:1}
+  82%{opacity:.5}    92%,100%{opacity:0}}
+.slot:has(.stage.bonus) .lampglow,
+.slot:has(.stage.bonus) .lamppool,
+.slot:has(.stage.bonus) .lampbar{animation:none;opacity:1}
+@media (prefers-reduced-motion: reduce){
+  .lampglow,.lamppool,.lampbar{animation:none}}
 .slot:has(.stage.bonus) .park{background-image:url("park-night.svg")}
 /* the bonus round pins the sky to night */
 .slot:has(.stage.bonus) .sky{animation:none;background:linear-gradient(#140826,#2a0f47 55%,#45155f)}
 .slot:has(.stage.bonus) #sun{opacity:0;animation:none}
 .slot:has(.stage.bonus) #moon{animation:none;opacity:1;left:46%;top:6%}
 .slot:has(.stage.bonus) .clouds{animation:none;filter:brightness(.35) saturate(.3)}
-.slot:has(.stage.bonus) .park,.slot:has(.stage.bonus) .sklayer{animation:none;filter:none}
+.slot:has(.stage.bonus) .park,.slot:has(.stage.bonus) #sklayer{animation:none;filter:none}
 @media (prefers-reduced-motion: reduce){
-  .sky,.orb,.clouds,.park,.sklayer{animation:none}}
+  .sky,.orb,.clouds,.park,#sklayer{animation:none}}
 
 /* ---- stick-figure skaters riding the park backdrop ---- */
 /* Square boxes: Sk8Anim draws into a 100x100 viewBox with the board line
@@ -578,7 +603,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="sklayer" id="fxlayer"><div class="lampglow" id="glowL"></div><div class="lampglow" id="glowR"></div><div class="lamppool" id="poolL"></div><div class="lamppool" id="poolR"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3669,14 +3694,18 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
    (16:9, centred horizontally, anchored to the bottom) so the sprites stay
    locked to the bowl, the rail and the flat at every window size. */
 (function(){
-  var scene = document.querySelector('.scene'), layer = document.getElementById('sklayer');
-  if (!scene || !layer) return;
+  var scene = document.querySelector('.scene');
+  var layers = [document.getElementById('sklayer'), document.getElementById('fxlayer')]
+                 .filter(Boolean);
+  if (!scene || !layers.length) return;
   function fit(){
     var w = scene.clientWidth, h = scene.clientHeight, ar = 16/9, lw, lh;
     if (!w || !h) return;
     if (w/h > ar){ lw = w; lh = w/ar; } else { lh = h; lw = h*ar; }
-    layer.style.width = lw+'px'; layer.style.height = lh+'px';
-    layer.style.left = ((w-lw)/2)+'px'; layer.style.top = (h-lh)+'px';
+    layers.forEach(function(layer){
+      layer.style.width = lw+'px'; layer.style.height = lh+'px';
+      layer.style.left = ((w-lw)/2)+'px'; layer.style.top = (h-lh)+'px';
+    });
   }
   fit();
   if (window.ResizeObserver) new ResizeObserver(fit).observe(scene);
