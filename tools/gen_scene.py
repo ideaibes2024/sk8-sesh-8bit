@@ -688,9 +688,7 @@ def build(night=False):
         c.rect(x - 6.4 * s, y, 12.8 * s, 1.4, hx('#ff8a1e'))
         c.rect(x - 3.4 * s, y - 5 * s, 6.8 * s, 2, hx('#ffffff'))
 
-    cone(250, 176, 1.1)
-    cone(12, 174, .9)
-    cone(314, 172, .85)
+    # cones removed: half-hidden by the control bar they read as small figures
 
     # trash can
     tc_x, tc_y = 104, 134
@@ -725,16 +723,9 @@ def build(night=False):
     c.line((124, 118), (130, 100), hx('#19c7c7'), 3)
     c.ocircle(124, 119, 1.3, hx('#ffe14a'))
 
-    # pigeon + dog
+    # pigeon (the dog is gone -- it read as a small figure near the floor)
     c.rect(206, 116, 4, 3, ink); c.rect(206, 116, 3, 2, hx('#8e97a3'))
     c.rect(209, 115, 2, 1, ink)
-    dg = 174
-    c.fellipse(dg - 1, 152, 9, 2, hx('#000000'), .2)
-    c.rect(dg - 8, 144, 14, 6, ink); c.rect(dg - 7, 145, 12, 4, hx('#c08a4a'))
-    c.rect(dg + 4, 140, 6, 6, ink); c.rect(dg + 5, 141, 4, 4, hx('#c08a4a'))
-    c.rect(dg + 4, 139, 2, 2, ink)
-    c.rect(dg - 6, 149, 2, 3, ink); c.rect(dg + 2, 149, 2, 3, ink)
-    c.line((dg - 8, 144), (dg - 12, 139), ink, 2)
 
     # floodlight towers rising behind the fence
     for lx in (34, 286):
