@@ -238,14 +238,28 @@ body:has(.slot:not([hidden])){overflow:hidden}
   94%{left:12.81%;top:46.50%}  97%{left:0.31%;top:61.50%}
   100%{left:-12.81%;top:67.61%;transform:scaleX(-1)}}
 
-/* green path -- in from off-screen right, down the handrail, rolls out */
-#skRail{animation:pathRail 6.6s linear infinite}
+/* green path -- down the handrail, roll out, then back up the stairs one
+   tread at a time. Paired keyframes at each tread (flat, then rise) make
+   the climb read as steps instead of one smooth diagonal.
+   10s matches the 'stairclimb' trick's own 10000ms. */
+#skRail{animation:pathRail 10s linear infinite}
 @keyframes pathRail{
-  0%{left:99.69%;top:43.17%;opacity:0}   8%{left:93.44%;top:43.17%;opacity:1}
-  20%{left:87.19%;top:43.17%}  29%{left:85.31%;top:39.28%} 33%{left:84.69%;top:42.61%}
-  37%{left:84.38%;top:45.39%}  56%{left:77.81%;top:54.28%} 76%{left:71.25%;top:63.73%}
-  84%{left:69.38%;top:66.50%}  90%{left:67.81%;top:69.84%;opacity:1}
-  100%{left:62.81%;top:71.50%;opacity:0}}
+  0%{left:85.94%;top:44.83%;transform:scaleX(-1)}
+  3%{left:85.31%;top:43.72%}    6%{left:84.69%;top:45.94%}
+  9%{left:83.75%;top:47.61%}    30%{left:77.19%;top:57.06%}
+  46%{left:70.94%;top:65.94%}   50%{left:69.38%;top:68.17%}
+  54%{left:68.13%;top:70.39%}   60%{left:65.63%;top:72.06%}
+  64%{left:64.06%;top:72.61%}   70%{left:64.06%;top:72.61%;transform:scaleX(-1)}
+  74%{left:64.69%;top:72.61%;transform:scaleX(1)}
+  78.5%{left:70.31%;top:68.17%}
+  80%{left:71.56%;top:63.72%}   81.8%{left:73.13%;top:63.72%}
+  83.3%{left:75.00%;top:59.83%} 85.1%{left:76.56%;top:59.83%}
+  86.6%{left:78.44%;top:55.94%} 88.4%{left:80.00%;top:55.94%}
+  89.9%{left:81.88%;top:52.06%} 91.7%{left:83.44%;top:52.06%}
+  93.2%{left:85.00%;top:48.17%} 95.0%{left:86.56%;top:48.17%}
+  96.2%{left:88.13%;top:44.28%;transform:scaleX(1)}
+  98%{left:86.88%;top:44.28%;transform:scaleX(-1)}
+  100%{left:85.94%;top:44.83%;transform:scaleX(-1)}}
 
 /* pink -- stands off to the side, idling */
 #skIdle{left:80.31%;top:75.95%}
@@ -1955,7 +1969,9 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     hypeB:  {head:[50,23],neck:[50,32],hip:[50,53],kL:[43,65],fL:[40,76],kR:[57,65],fR:[61,76],eL:[40,30],hL:[33,22],eR:[60,30],hR:[67,22]},
     fall:   {head:[36,50],neck:[42,48],hip:[58,50],kL:[66,40],fL:[74,34],kR:[68,56],fR:[78,58],eL:[38,38],hL:[30,34],eR:[44,58],hR:[36,64]},
     pickup: {head:[44,42],neck:[46,49],hip:[52,60],kL:[46,66],fL:[42,76],kR:[58,66],fR:[60,76],eL:[41,56],hL:[36,70],eR:[55,57],hR:[50,70]},
-    carry:  {head:[50,22],neck:[50,31],hip:[50,52],kL:[43,64],fL:[40,76],kR:[57,64],fR:[61,76],eL:[43,41],hL:[40,48],eR:[57,41],hR:[60,48]}
+    carry:  {head:[50,22],neck:[50,31],hip:[50,52],kL:[43,64],fL:[40,76],kR:[57,64],fR:[61,76],eL:[43,41],hL:[40,48],eR:[57,41],hR:[60,48]},
+    walkA:  {head:[50,22],neck:[50,31],hip:[50,52],kL:[44,62],fL:[38,74],kR:[58,63],fR:[64,76],eL:[43,41],hL:[40,48],eR:[57,41],hR:[60,48]},
+    walkB:  {head:[50,21],neck:[50,30],hip:[50,51],kL:[56,62],fL:[62,74],kR:[44,63],fR:[38,76],eL:[43,40],hL:[40,47],eR:[57,40],hR:[60,47]}
   };
   // keyframes: t (0..1 of the loop), pose, dy (body lift), board {dy, rot, flip (turns), spin (turns), dx}, rot (body rotation deg), spin (body turns)
   const T = {
@@ -1976,6 +1992,19 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       [0.56,'pickup',0,{ground:1,dx:13,rot:8}], [0.62,'pickup',0,{hold:1}],
       [0.70,'carry',0,{hold:1}], [0.78,'carry',0,{hold:1}],
       [0.84,'crouch',0,{ground:1,dx:0}], [0.90,'crouch',0], [1,'stand',0]]},
+    // ollies onto the handrail, 50-50s down it, lands and rolls out, steps
+    // off and picks the board up, then walks back up the stairs one at a
+    // time carrying it and drops in again. A closed loop -- no fading out.
+    stairclimb: {ms:10000, k:[
+      [0,'stand',0], [0.03,'crouch',0], [0.06,'air',-10,{rot:-12}],
+      [0.09,'grind',0], [0.30,'grind',0], [0.46,'grind',0],
+      [0.50,'air',-8,{rot:-6}], [0.54,'crouch',0], [0.60,'stand',0],
+      [0.64,'stand',0,{ground:1,dx:12}], [0.68,'pickup',0,{ground:1,dx:10}],
+      [0.70,'pickup',0,{hold:1}], [0.74,'carry',0,{hold:1}],
+      [0.785,'walkA',0,{hold:1}], [0.818,'walkB',0,{hold:1}],
+      [0.851,'walkA',0,{hold:1}], [0.884,'walkB',0,{hold:1}],
+      [0.917,'walkA',0,{hold:1}], [0.950,'walkB',0,{hold:1}],
+      [0.962,'carry',0,{hold:1}], [0.98,'crouch',0,{ground:1}], [1,'stand',0]]},
     bail:    {ms:1900, k:[[0,'stand',0],[0.15,'crouch',0],[0.3,'air',-18,{rot:-16}],[0.45,'air',-20,{gap:8,rot:40,dx:10}],[0.62,'fall',-4,{ground:1,rot:170,dx:20},-40],[0.8,'fall',6,{ground:1,rot:180,dx:24},-10],[1,'fall',6,{ground:1,rot:180,dx:24},-10]], stars:true}
   };
   const lerp = (a,b,t) => a + (b-a)*t;
@@ -3593,7 +3622,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
     if (trick === 'grind' && scn.children[1]) scn.children[1].style.display = 'none';  // its own rail
   }
   ride('skRamp', 'deckout');
-  ride('skRail', 'grind');
+  ride('skRail', 'stairclimb');
   ride('skIdle', 'idle');
 })();
 </script>
