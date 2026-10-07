@@ -29,6 +29,9 @@ OUT2 = hx('#2a2320')         # softer ink for background layers
 # --------------------------------------------------------------------------
 # canvas
 # --------------------------------------------------------------------------
+KEY = (1, 2, 3)   # transparent sentinel: never blended into, never emitted
+
+
 class Canvas:
     def __init__(self, w, h, bg=(0, 0, 0)):
         self.w, self.h = w, h
@@ -42,6 +45,8 @@ class Canvas:
             self.px[y][x] = c
         else:
             o = self.px[y][x]
+            if o == KEY:        # don't tint empty sky into a grey haze
+                return
             self.px[y][x] = (round(o[0] + (c[0] - o[0]) * a),
                              round(o[1] + (c[1] - o[1]) * a),
                              round(o[2] + (c[2] - o[2]) * a))
@@ -101,6 +106,8 @@ class Canvas:
             row = self.px[y]
             for x in range(self.w):
                 o = row[x]
+                if o == KEY:
+                    continue
                 row[x] = (round(o[0] + (c[0] - o[0]) * a),
                           round(o[1] + (c[1] - o[1]) * a),
                           round(o[2] + (c[2] - o[2]) * a))
@@ -403,7 +410,7 @@ POSE_FILM = dict(
 # --------------------------------------------------------------------------
 # the park
 # --------------------------------------------------------------------------
-def build(night=False):
+def build(night=False, sky=True):
     P = dict(
         sky=['#5bbdf7', '#7fd3ff', '#a9e2ff', '#cdeeff', '#eaf8ff'],
         sun='#ffe14a', cloud='#ffffff', cloud_sh='#c9e4f5',
@@ -420,18 +427,19 @@ def build(night=False):
         ground='#6a6472', ground_d='#575162', ground_l='#7d7688',
     )
 
-    c = Canvas(W, H, hx(P['sky'][0]))
+    c = Canvas(W, H, hx(P['sky'][0]) if sky else KEY)
 
     # ---------------- sky ------------------------------------------------
+    # (skipped in sky=False builds -- the page animates a live day cycle there)
     bands = [(0, 26), (26, 48), (48, 68), (68, 88), (88, 108)]
-    for i, (a, b) in enumerate(bands):
+    for i, (a, b) in enumerate(bands if sky else []):
         c.rect(0, a, W, b - a, hx(P['sky'][i]))
         # ordered dither on each seam so the gradient reads as 8-bit
         for x in range(0, W, 2):
             c.set(x + (i % 2), b - 1, hx(P['sky'][min(i + 1, 4)]))
             c.set(x + 1 - (i % 2), b - 2, hx(P['sky'][min(i + 1, 4)]))
 
-    if night:
+    if night and sky:
         stars = [(18, 14), (44, 30), (67, 9), (95, 22), (121, 12), (148, 34),
                  (172, 8), (196, 26), (223, 15), (247, 36), (272, 10), (298, 28),
                  (33, 52), (82, 46), (137, 58), (189, 50), (236, 61), (289, 48),
@@ -448,7 +456,7 @@ def build(night=False):
         c.fcircle(271, 22, 9, hx(P['sky'][1]))
         for mx, my, mr in ((262, 30, 2), (259, 24, 1), (264, 34, 1)):
             c.fcircle(mx, my, mr, hx('#ded8c0'))
-    else:
+    elif sky:
         # sun with a chunky pixel corona
         c.glow(266, 26, 26, hx('#fff4a8'), .35)
         c.ocircle(266, 26, 12, hx(P['sun']))
@@ -470,7 +478,7 @@ def build(night=False):
         cloud(96, 52, .6)
 
     # birds
-    if not night:
+    if not night and sky:
         for bx_, by_, sc in ((150, 44, 1), (162, 38, 1), (174, 47, 1), (96, 30, 1)):
             c.line((bx_ - 3 * sc, by_), (bx_, by_ - 2 * sc), OUT2, 1)
             c.line((bx_, by_ - 2 * sc), (bx_ + 3 * sc, by_), OUT2, 1)
@@ -717,9 +725,12 @@ def build(night=False):
 
     # ---------------- chain-link fence (in front of the wall top) ----------
     fz_top, fz_bot = 74, 96
+    # solid, not alpha-blended: the sky behind the fence is transparent now,
+    # and a blended stroke would simply not land on it
+    mesh = hx('#8d96a3') if not night else hx('#5f5a70')
     for x in range(-24, W + 24, 6):
-        c.line((x, fz_top), (x + 22, fz_bot), hx(P['fence']), 1, .45)
-        c.line((x + 22, fz_top), (x, fz_bot), hx(P['fence']), 1, .45)
+        c.line((x, fz_top), (x + 22, fz_bot), mesh, 1)
+        c.line((x + 22, fz_top), (x, fz_bot), mesh, 1)
     c.rect(0, fz_top - 2, W, 2, ink)
     c.rect(0, fz_top - 2, W, 1, hx(P['fence']))
     c.rect(0, fz_bot - 1, W, 2, ink)
@@ -775,6 +786,8 @@ def quantize(c, step=10):
         row = c.px[y]
         for x in range(c.w):
             o = row[x]
+            if o == KEY:
+                continue
             q = lut.get(o)
             if q is None:
                 q = tuple(min(255, int(round(v / step)) * step) for v in o)
@@ -808,6 +821,8 @@ def to_svg(c):
              'width="%d" height="%d" shape-rendering="crispEdges" '
              'preserveAspectRatio="xMidYMax slice">' % (W * SCALE, H * SCALE, W * SCALE, H * SCALE)]
     for col, rs in sorted(by_colour.items(), key=lambda kv: -len(kv[1])):
+        if col == KEY:          # transparent: emit nothing
+            continue
         parts.append('<g fill="#%02x%02x%02x">' % col)
         for (x, y, w, h) in rs:
             parts.append('<rect x="%d" y="%d" width="%d" height="%d"/>'
