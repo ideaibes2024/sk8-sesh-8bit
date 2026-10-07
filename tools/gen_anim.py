@@ -23,7 +23,7 @@ from gen_scene import Canvas, hx, OUT, SKIN, HAIR, SHIRT, PANTS, DECK, pal_of
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-FRAMES = 32            # cells per loop
+FRAMES = 48            # cells per loop -- 12fps at a 4s cycle
 SCALE = 5              # art pixel -> screen pixel, matches the park SVG
 BOX_W, BOX_H = 46, 40  # sprite cell, in art pixels -- generous margins matter
 ORIGIN = (23, 32)      # where the board centre sits inside the cell
@@ -34,9 +34,11 @@ KEY = (1, 2, 3)        # transparent sentinel
 # --------------------------------------------------------------------------
 # poses  (local coords: +x forward, -y up, origin at the board centre)
 # --------------------------------------------------------------------------
-def P(head, neck, hip, arm, arm_b, leg, leg_b, ba=0, bx=0, by=0, bz='under'):
+def P(head, neck, hip, arm, arm_b, leg, leg_b, ba=0, bx=0, by=0, bz='under', sq=1.0):
+    """sq: squash/stretch -- <1 compresses the figure toward the board,
+    >1 stretches it. Applied about the contact point at draw time."""
     return dict(head=head, neck=neck, hip=hip, arms=[arm], arms_back=[arm_b],
-                legs=[leg], legs_back=[leg_b],
+                legs=[leg], legs_back=[leg_b], sq=sq,
                 board=dict(x=bx, y=by, a=ba, len=11, z=bz))
 
 
@@ -56,13 +58,13 @@ CROUCH = P((1, -17), (.5, -14), (-1, -8.5),
            ((.5, -13.5), (5, -12), (8, -13)),
            ((0, -13.5), (-4, -12.5), (-7, -11)),
            ((-1, -8.5), (3.5, -5.5), (4, -1.5)),
-           ((-1.5, -8.5), (-4.5, -5.5), (-5, -1.5)))
+           ((-1.5, -8.5), (-4.5, -5.5), (-5, -1.5)), sq=0.88)
 
 POP = P((1.5, -19), (1, -16), (-1, -9.5),
         ((1, -15.5), (5.5, -16), (9, -18)),
         ((.5, -15.5), (-4, -16), (-7, -18)),
         ((-1, -9.5), (3, -6.5), (5, -3.5)),
-        ((-1.5, -9.5), (-4, -5.5), (-5.5, -.5)), ba=-24)
+        ((-1.5, -9.5), (-4, -5.5), (-5.5, -.5)), ba=-24, sq=1.10)
 
 AIR = P((1.5, -20), (.5, -16.5), (-1.5, -9.5),
         ((.5, -15.5), (5, -16), (8.5, -19)),
@@ -74,7 +76,7 @@ LAND = P((1, -17.5), (.5, -14.5), (-1, -9),
          ((.5, -14), (5, -12.5), (8, -13.5)),
          ((0, -14), (-4.2, -13), (-7.2, -11.5)),
          ((-1, -9), (3.4, -6), (4, -1.5)),
-         ((-1.5, -9), (-4.4, -6), (-5, -1.5)))
+         ((-1.5, -9), (-4.4, -6), (-5, -1.5)), sq=0.84)
 
 # bowl: compressed pump, extended rise, grabbed air over the coping
 PUMP = P((2.5, -16.5), (1.5, -13.5), (-1.5, -8),
@@ -145,6 +147,7 @@ def lerp_pose(a, b, t):
         out[k] = lerp_pt(a[k], b[k], t)
     for k in ('arms', 'arms_back', 'legs', 'legs_back'):
         out[k] = [tuple(lerp_pt(p, q, t) for p, q in zip(a[k][0], b[k][0]))]
+    out['sq'] = lerp(a.get('sq', 1.0), b.get('sq', 1.0), t)
     ab, bb = a['board'], b['board']
     out['board'] = dict(x=lerp(ab['x'], bb['x'], t), y=lerp(ab['y'], bb['y'], t),
                         a=lerp(ab['a'], bb['a'], t), len=ab['len'],
@@ -152,18 +155,29 @@ def lerp_pose(a, b, t):
     return out
 
 
-def ease(t):
-    """smoothstep -- keeps limbs from snapping at keyframes"""
-    return t * t * (3 - 2 * t)
+def ease(t, kind='smooth'):
+    """Timing and spacing is what separates readable sprite animation from
+    floaty interpolation. 'hold' sits on a pose then leaves late; 'snap'
+    leaves instantly and decelerates in; 'linear' is constant speed."""
+    if kind == 'linear':
+        return t
+    if kind == 'snap':                 # explosive out, settle in
+        return 1 - (1 - t) ** 3
+    if kind == 'hold':                 # lingers on the outgoing extreme
+        return t ** 2.4
+    if kind == 'settle':               # eases hard into the incoming pose
+        return 1 - (1 - t) ** 2
+    return t * t * (3 - 2 * t)         # smoothstep
 
 
 def sample(timeline, u):
-    """timeline: [(t, pose, board_angle_override|None)] with t in 0..1"""
+    """timeline: [(t, pose, board_angle_override|None[, ease_kind])]"""
     for i in range(len(timeline) - 1):
-        t0, p0, a0 = timeline[i]
-        t1, p1, a1 = timeline[i + 1]
+        t0, p0, a0 = timeline[i][0], timeline[i][1], timeline[i][2]
+        t1, p1, a1 = timeline[i + 1][0], timeline[i + 1][1], timeline[i + 1][2]
+        kind = timeline[i][3] if len(timeline[i]) > 3 else 'smooth'
         if t0 <= u <= t1:
-            f = ease((u - t0) / (t1 - t0)) if t1 > t0 else 0
+            f = ease((u - t0) / (t1 - t0), kind) if t1 > t0 else 0
             pose = lerp_pose(p0, p1, f)
             if a0 is not None and a1 is not None:
                 pose['board'] = dict(pose['board'], a=lerp(a0, a1, f))
@@ -219,8 +233,10 @@ def head(c, hp, facing, pal, s):
 def draw_figure(c, ox, oy, pose, pal, flip, s=FIG):
     f = -1 if flip else 1
 
+    sq = pose.get('sq', 1.0)
+
     def T(p):
-        return (ox + p[0] * s * f, oy + p[1] * s)
+        return (ox + p[0] * s * f, oy + p[1] * s * sq)
 
     bd = pose['board']
     if bd['z'] == 'under':
@@ -265,20 +281,28 @@ def draw_figure(c, ox, oy, pose, pal, flip, s=FIG):
 # rotation during the ollie without the interpolator unwinding it
 # blue shirt: rolls up the quarter pipe, flips out over the coping, lands and
 # rides back down to where it started -- a closed loop, nothing teleports
-RAMP = [(0.00, ROLL, 0), (0.16, ROLL2, 0), (0.30, CROUCH, 0), (0.40, POP, -30),
-        (0.50, AIR, -170), (0.58, AIR, -300), (0.64, AIR, -360), (0.70, LAND, -360),
-        (0.80, ROLL2, -360), (1.00, ROLL, -360)]
+RAMP = [(0.00, ROLL, 0, 'smooth'), (0.16, ROLL2, 0, 'hold'),
+        (0.30, CROUCH, 0, 'hold'),                 # coil, and sit on it
+        (0.38, POP, -30, 'snap'),                  # explode off the tail
+        (0.48, AIR, -170, 'linear'), (0.56, AIR, -300, 'linear'),
+        (0.63, AIR, -360, 'settle'),               # catch the board
+        (0.69, LAND, -360, 'settle'),              # absorb
+        (0.78, ROLL2, -360, 'smooth'), (1.00, ROLL, -360, 'smooth')]
 
 # green shirt: in from off-screen right, onto the handrail, 50-50 down it,
 # lands and rolls out before the loop restarts
-RAIL = [(0.00, ROLL, 0), (0.16, ROLL2, 0), (0.24, CROUCH, 0), (0.29, POP, -20),
-        (0.33, AIR, -8), (0.37, GRIND, 0), (0.56, GRIND2, 0), (0.76, GRIND, 0),
-        (0.84, AIR, -10), (0.90, LAND, 0), (1.00, ROLL, 0)]
+RAIL = [(0.00, ROLL, 0, 'smooth'), (0.15, ROLL2, 0, 'hold'),
+        (0.23, CROUCH, 0, 'hold'), (0.28, POP, -20, 'snap'),
+        (0.33, AIR, -8, 'settle'), (0.37, GRIND, 0, 'settle'),
+        (0.56, GRIND2, 0, 'smooth'), (0.76, GRIND, 0, 'hold'),
+        (0.83, AIR, -10, 'snap'), (0.89, LAND, 0, 'settle'),
+        (1.00, ROLL, 0, 'smooth')]
 
 # pink shirt: stands her ground, breathing and tapping the nose of her board
-IDLE = [(0.00, STAND_A, None), (0.22, STAND_B, None), (0.44, STAND_A, None),
-        (0.60, TAP, None), (0.70, TAP, None), (0.84, STAND_A, None),
-        (1.00, STAND_A, None)]
+IDLE = [(0.00, STAND_A, None, 'smooth'), (0.22, STAND_B, None, 'smooth'),
+        (0.44, STAND_A, None, 'hold'),
+        (0.58, TAP, None, 'snap'), (0.66, TAP, None, 'hold'),
+        (0.78, STAND_A, None, 'settle'), (1.00, STAND_A, None, 'smooth')]
 
 
 def sheet(timeline, pal, flip, path):

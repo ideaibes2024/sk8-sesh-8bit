@@ -219,12 +219,12 @@ body:has(.slot:not([hidden])){overflow:hidden}
 /* ---- animated 8-bit skaters layered over the park backdrop ---- */
 .sklayer{position:absolute;pointer-events:none;overflow:hidden}
 .sk{position:absolute;width:14.375%;height:22.222%;background-repeat:no-repeat;
-  background-size:3200% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
+  background-size:4800% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes skframes{from{background-position-x:0%}to{background-position-x:100%}}
 
 /* blue shirt -- rolls up the quarter pipe, flips out, rides back down */
 #skRamp{background-image:url("skater-ramp.png");
-  animation:skframes 5s steps(32) infinite, pathRamp 5s linear infinite}
+  animation:skframes 5s steps(48) infinite, pathRamp 5s linear infinite}
 @keyframes pathRamp{
   0%{left:-4.06%;top:65.00%}  16%{left:3.44%;top:60.56%}  30%{left:9.06%;top:53.89%}
   40%{left:13.44%;top:47.22%} 50%{left:16.25%;top:37.78%} 58%{left:14.69%;top:43.33%}
@@ -233,7 +233,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
 
 /* green shirt -- in from off-screen right, down the handrail, rolls out */
 #skRail{background-image:url("skater-rail.png");
-  animation:skframes 6s steps(32) infinite, pathRail 6s linear infinite}
+  animation:skframes 6s steps(48) infinite, pathRail 6s linear infinite}
 @keyframes pathRail{
   0%{left:99.69%;top:45.00%;opacity:0}   8%{left:93.44%;top:45.00%;opacity:1}
   20%{left:87.19%;top:45.00%}  29%{left:85.31%;top:41.11%} 33%{left:84.69%;top:44.44%}
@@ -243,7 +243,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
 
 /* pink shirt -- stands off to one side, breathing and tapping her board */
 #skIdle{background-image:url("skater-idle.png");left:80.31%;top:77.78%;
-  animation:skframes 4.5s steps(32) infinite}
+  animation:skframes 4.5s steps(48) infinite}
 
 .slot:has(.stage.bonus) .sk{filter:brightness(.6) saturate(.85) hue-rotate(-10deg)}
 @media (prefers-reduced-motion: reduce){.sk{animation:none}}
