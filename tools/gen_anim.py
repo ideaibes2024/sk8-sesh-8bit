@@ -25,9 +25,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FRAMES = 32            # cells per loop
 SCALE = 5              # art pixel -> screen pixel, matches the park SVG
-BOX_W, BOX_H = 34, 32  # sprite cell, in art pixels
-ORIGIN = (17, 27)      # where the board centre sits inside the cell
-FIG = 0.76             # figure scale -- smaller than the old static skaters
+BOX_W, BOX_H = 46, 40  # sprite cell, in art pixels -- generous margins matter
+ORIGIN = (23, 32)      # where the board centre sits inside the cell
+FIG = 0.58             # figure scale
 KEY = (1, 2, 3)        # transparent sentinel
 
 
@@ -107,6 +107,25 @@ GRIND2 = P((3, -17), (1.5, -14), (-2.5, -8.2),
            ((1, -13.5), (-4.2, -15), (-8.2, -13.2)),
            ((-2.5, -8.2), (2.6, -5.3), (3.5, -1.5)),
            ((-3, -8.2), (-5.6, -4.8), (-4.5, -1.5)))
+
+
+STAND_A = P((0, -21), (0, -17.5), (0, -10),
+            ((0, -17), (3, -13.5), (4.5, -10)),
+            ((-.5, -17), (-3, -13.5), (-4.5, -10)),
+            ((0, -10), (2, -5.5), (3, -1.5)),
+            ((-.5, -10), (-2.5, -5.5), (-3.5, -1.5)))
+
+STAND_B = P((0, -20.2), (0, -16.8), (0, -9.6),
+            ((0, -16.3), (3.2, -13), (4.6, -9.4)),
+            ((-.5, -16.3), (-3.2, -13), (-4.6, -9.4)),
+            ((0, -9.6), (2.2, -5.3), (3, -1.5)),
+            ((-.5, -9.6), (-2.7, -5.3), (-3.5, -1.5)))
+
+TAP = P((0, -20.8), (0, -17.3), (-.3, -9.9),
+        ((0, -16.8), (3.5, -14), (5.5, -11.5)),
+        ((-.5, -16.8), (-3.5, -14), (-5.5, -11.5)),
+        ((-.3, -9.9), (2.5, -6), (4, -3.2)),
+        ((-.8, -9.9), (-2.8, -5.5), (-3.5, -1.5)), ba=-18)
 
 
 # --------------------------------------------------------------------------
@@ -244,25 +263,34 @@ def draw_figure(c, ox, oy, pose, pal, flip, s=FIG):
 # --------------------------------------------------------------------------
 # (t, pose, board-angle override)  -- the override lets the deck spin a full
 # rotation during the ollie without the interpolator unwinding it
-STREET = [(0.00, ROLL, 0), (0.18, ROLL2, 0), (0.34, CROUCH, 0), (0.44, POP, -30),
-          (0.54, AIR, -150), (0.63, AIR, -270), (0.71, AIR, -345), (0.78, LAND, -360),
-          (0.90, ROLL2, -360), (1.00, ROLL, -360)]
+# blue shirt: rolls up the quarter pipe, flips out over the coping, lands and
+# rides back down to where it started -- a closed loop, nothing teleports
+RAMP = [(0.00, ROLL, 0), (0.16, ROLL2, 0), (0.30, CROUCH, 0), (0.40, POP, -30),
+        (0.50, AIR, -170), (0.58, AIR, -300), (0.64, AIR, -360), (0.70, LAND, -360),
+        (0.80, ROLL2, -360), (1.00, ROLL, -360)]
 
-BOWL = [(0.00, PUMP, None), (0.20, RISE, None), (0.36, GRAB, None), (0.50, GRAB, None),
-        (0.64, RISE, None), (0.82, PUMP, None), (1.00, PUMP, None)]
+# green shirt: in from off-screen right, onto the handrail, 50-50 down it,
+# lands and rolls out before the loop restarts
+RAIL = [(0.00, ROLL, 0), (0.16, ROLL2, 0), (0.24, CROUCH, 0), (0.29, POP, -20),
+        (0.33, AIR, -8), (0.37, GRIND, 0), (0.56, GRIND2, 0), (0.76, GRIND, 0),
+        (0.84, AIR, -10), (0.90, LAND, 0), (1.00, ROLL, 0)]
 
-RAIL = [(0.00, ROLL, 0), (0.14, CROUCH, 0), (0.22, POP, -20), (0.30, AIR, -8),
-        (0.38, GRIND, 0), (0.56, GRIND2, 0), (0.72, GRIND, 0), (0.80, AIR, -10),
-        (0.88, LAND, 0), (1.00, ROLL, 0)]
+# pink shirt: stands her ground, breathing and tapping the nose of her board
+IDLE = [(0.00, STAND_A, None), (0.22, STAND_B, None), (0.44, STAND_A, None),
+        (0.60, TAP, None), (0.70, TAP, None), (0.84, STAND_A, None),
+        (1.00, STAND_A, None)]
 
 
 def sheet(timeline, pal, flip, path):
+    """flip may be a bool, or a callable(u)->bool to turn mid-cycle"""
     from PIL import Image
     W, H = BOX_W * FRAMES, BOX_H
     c = Canvas(W, H, KEY)
     for i in range(FRAMES):
-        pose = sample(timeline, i / float(FRAMES))
-        draw_figure(c, i * BOX_W + ORIGIN[0], ORIGIN[1], pose, pal, flip)
+        u = i / float(FRAMES)
+        pose = sample(timeline, u)
+        fl = flip(u) if callable(flip) else flip
+        draw_figure(c, i * BOX_W + ORIGIN[0], ORIGIN[1], pose, pal, fl)
     im = Image.new('RGBA', (W, H))
     im.putdata([(p + (0,)) if p == KEY else (p + (255,))
                 for y in range(H) for x in range(W) for p in (c.px[y][x],)])
@@ -273,12 +301,16 @@ def sheet(timeline, pal, flip, path):
 
 if __name__ == '__main__':
     jobs = [
-        ('skater-street.png', STREET,
-         pal_of(skin=0, hair=4, shirt=0, pants=0, deck=3, style='cap', accent='#ff2fb0'), False),
-        ('skater-bowl.png', BOWL,
-         pal_of(skin=2, hair=3, shirt=7, pants=2, deck=1, style='long'), True),
+        # blue shirt -- faces right on the way up the ramp, left on the way down
+        ('skater-ramp.png', RAMP,
+         pal_of(skin=0, hair=4, shirt=2, pants=0, deck=3, style='cap', accent='#ffd21f'),
+         lambda u: u >= 0.66),
+        # green shirt -- travels right to left the whole way
         ('skater-rail.png', RAIL,
          pal_of(skin=1, hair=0, shirt=3, pants=5, deck=2, style='beanie', accent='#19c7c7'), True),
+        # pink shirt -- stationary
+        ('skater-idle.png', IDLE,
+         pal_of(skin=2, hair=3, shirt=0, pants=2, deck=1, style='long'), True),
     ]
     ims = []
     for name, tl, pal, flip in jobs:

@@ -70,7 +70,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .stagetop{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;min-height:44px}
 .mascot{width:78px;height:78px;flex:0 0 auto;margin-block:-8px}
 /* the stick-figure mascot is retired; the animated pixel skaters carry the theme */
-.mascot{display:none}
+.mascot,#cel-art{display:none}
 .banner{flex:1;font-family:var(--f-d);font-size:11px;color:#111;background:rgba(255,255,255,.85);border:2px solid #000;padding:8px;text-align:center;line-height:1.5}
 .stage.bonus .banner{background:#FF3EA5;color:#fff}
 .gridbox{position:relative;aspect-ratio:1/1;max-width:100%}
@@ -218,26 +218,33 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .slot:has(.stage.bonus) .scene{background:#1a0b33 url("scene-night.svg") center bottom/cover no-repeat}
 /* ---- animated 8-bit skaters layered over the park backdrop ---- */
 .sklayer{position:absolute;pointer-events:none;overflow:hidden}
-.sk{position:absolute;width:10.625%;height:17.778%;background-repeat:no-repeat;
+.sk{position:absolute;width:14.375%;height:22.222%;background-repeat:no-repeat;
   background-size:3200% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes skframes{from{background-position-x:0%}to{background-position-x:100%}}
-#skStreet{background-image:url("skater-street.png");top:66.11%;
-  animation:skframes 4s steps(32) infinite, pathStreet 13s linear infinite}
-@keyframes pathStreet{from{left:-12.81%}to{left:102.19%}}
-#skBowl{background-image:url("skater-bowl.png");
-  animation:skframes 4s steps(32) infinite, pathBowl 4s linear infinite}
-@keyframes pathBowl{
-  0%{left:20.94%;top:76.11%} 20%{left:10.94%;top:70.00%} 36%{left:4.06%;top:62.78%}
-  50%{left:2.81%;top:60.56%} 64%{left:4.06%;top:63.89%} 82%{left:12.19%;top:71.11%}
-  100%{left:20.94%;top:76.11%}}
+
+/* blue shirt -- rolls up the quarter pipe, flips out, rides back down */
+#skRamp{background-image:url("skater-ramp.png");
+  animation:skframes 5s steps(32) infinite, pathRamp 5s linear infinite}
+@keyframes pathRamp{
+  0%{left:-4.06%;top:65.00%}  16%{left:3.44%;top:60.56%}  30%{left:9.06%;top:53.89%}
+  40%{left:13.44%;top:47.22%} 50%{left:16.25%;top:37.78%} 58%{left:14.69%;top:43.33%}
+  64%{left:13.44%;top:47.78%} 70%{left:11.56%;top:51.11%} 80%{left:5.31%;top:58.89%}
+  100%{left:-4.06%;top:65.00%}}
+
+/* green shirt -- in from off-screen right, down the handrail, rolls out */
 #skRail{background-image:url("skater-rail.png");
-  animation:skframes 4s steps(32) infinite, pathRail 4s linear infinite}
+  animation:skframes 6s steps(32) infinite, pathRail 6s linear infinite}
 @keyframes pathRail{
-  0%{left:91.56%;top:68.33%;opacity:0} 6%{opacity:1}
-  14%{left:88.44%;top:66.11%} 22%{left:87.19%;top:63.89%} 30%{left:85.94%;top:55.00%}
-  38%{left:85.31%;top:51.67%} 56%{left:79.69%;top:59.44%} 72%{left:73.44%;top:68.33%}
-  80%{left:70.94%;top:70.56%} 88%{left:68.44%;top:75.00%;opacity:1}
-  100%{left:65.94%;top:77.22%;opacity:0}}
+  0%{left:99.69%;top:45.00%;opacity:0}   8%{left:93.44%;top:45.00%;opacity:1}
+  20%{left:87.19%;top:45.00%}  29%{left:85.31%;top:41.11%} 33%{left:84.69%;top:44.44%}
+  37%{left:84.38%;top:47.22%}  56%{left:77.81%;top:56.11%} 76%{left:71.25%;top:65.56%}
+  84%{left:69.38%;top:68.33%}  90%{left:67.81%;top:71.67%;opacity:1}
+  100%{left:62.81%;top:73.33%;opacity:0}}
+
+/* pink shirt -- stands off to one side, breathing and tapping her board */
+#skIdle{background-image:url("skater-idle.png");left:80.31%;top:77.78%;
+  animation:skframes 4.5s steps(32) infinite}
+
 .slot:has(.stage.bonus) .sk{filter:brightness(.6) saturate(.85) hue-rotate(-10deg)}
 @media (prefers-reduced-motion: reduce){.sk{animation:none}}
 
@@ -479,7 +486,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sklayer" id="sklayer"><div class="sk" id="skStreet"></div><div class="sk" id="skBowl"></div><div class="sk" id="skRail"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
