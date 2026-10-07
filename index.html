@@ -285,16 +285,17 @@ body:has(.slot:not([hidden])){overflow:hidden}
    no litcycle filter -- light sources must not be dimmed by nightfall. */
 .lampglow,.lamppool,.lampbar{position:absolute;opacity:0;
   animation:lampcycle 180s linear infinite}
-.lampglow{width:31.25%;height:55.56%;top:-10.56%;
-  background:radial-gradient(closest-side,rgba(255,228,150,.55),rgba(255,214,120,.18) 45%,transparent 72%)}
-.lamppool{width:28.75%;height:24.44%;top:71.11%;
-  background:radial-gradient(closest-side,rgba(255,228,150,.30),transparent 75%)}
-.lampbar{width:5.94%;height:5.00%;top:14.44%;background:#fff6cf;
-  box-shadow:0 0 0 1px #141414}
-#glowL,#poolL{left:calc(10.63% - 15.63%)}
-#glowR{left:calc(89.38% - 15.63%)}
-#poolR{left:calc(89.38% - 14.38%)}
-#poolL{left:calc(10.63% - 14.38%)}
+.lampglow{width:56%;height:100%;top:-26%;
+  background:radial-gradient(closest-side,rgba(255,236,178,.92),rgba(255,224,140,.52) 32%,
+    rgba(255,214,120,.24) 56%,transparent 78%)}
+.lamppool{width:52%;height:44%;top:62%;
+  background:radial-gradient(closest-side,rgba(255,232,160,.60),rgba(255,224,140,.26) 48%,transparent 80%)}
+.lampbar{width:5.94%;height:5.00%;top:14.44%;background:#fffdf0;
+  box-shadow:0 0 0 1px #141414, 0 0 26px 10px rgba(255,236,170,.95)}
+#glowL{left:calc(10.63% - 28%)}
+#glowR{left:calc(89.38% - 28%)}
+#poolL{left:calc(10.63% - 26%)}
+#poolR{left:calc(89.38% - 26%)}
 #barL{left:7.81%}  #barR{left:86.56%}
 @keyframes lampcycle{
   0%,28%{opacity:0}  40%{opacity:.55}  54%,70%{opacity:1}
