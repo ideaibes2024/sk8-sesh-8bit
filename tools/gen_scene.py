@@ -642,30 +642,7 @@ def build(night=False):
     c.line(RAIL_A, RAIL_B, hx('#ffd21f'), 3)
     c.line((RAIL_A[0], RAIL_A[1] - 1), (RAIL_B[0], RAIL_B[1] - 1), hx('#fff3a8'), 1, .8)
 
-    # ---------------- bowl (front left) -----------------------------------
-    bw_cx, bw_cy, bw_rx, bw_ry = 66, 158, 44, 16
-    c.fellipse(bw_cx, bw_cy, bw_rx + 2, bw_ry + 2, ink)
-    # concentric transition bands so it reads as a dish, not a hole
-    for i, col in enumerate(('#bfb9ae', '#aea89d', '#9d978c', '#8d877d', '#7e786f')):
-        c.fellipse(bw_cx, bw_cy + i * 1.6, bw_rx - i * 7, bw_ry - i * 2.6, hx(col))
-    # sun-side highlight up the far wall
-    for a in range(200, 340, 3):
-        r = math.radians(a)
-        c.dot(bw_cx + math.cos(r) * (bw_rx - 4), bw_cy + math.sin(r) * (bw_ry - 1.6), 2,
-              hx('#c6c0b5'), .5)
-    # blue pool coping + tile band on the lip
-    for a in range(0, 360, 2):
-        r = math.radians(a)
-        c.dot(bw_cx + math.cos(r) * bw_rx, bw_cy + math.sin(r) * bw_ry, 3, hx('#2d6cdf'))
-    for a in range(0, 360, 12):
-        r = math.radians(a)
-        c.dot(bw_cx + math.cos(r) * bw_rx, bw_cy + math.sin(r) * bw_ry, 2, hx('#8fc0ff'))
-    for a in range(0, 360, 12):
-        r = math.radians(a + 6)
-        c.dot(bw_cx + math.cos(r) * bw_rx, bw_cy + math.sin(r) * bw_ry, 2, ink)
-    # drain + water stain in the flat bottom
-    c.rect(bw_cx + 2, bw_cy + 7, 4, 2, hx('#5e5951'))
-    c.line((bw_cx - 20, bw_cy + 9), (bw_cx - 4, bw_cy + 11), hx('#ffffff'), 1, .22)
+    # (the bowl used to sit here; removed -- it read as a hole in the floor)
 
     # ---------------- flat rail (front right) -----------------------------
     fr_y = 170
