@@ -223,13 +223,20 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .sklayer{position:absolute;pointer-events:none;overflow:hidden}
 .sk{position:absolute;width:14.375%;height:25.556%}
 
-/* blue path -- up the quarter pipe, flip over the coping, ride back down */
-#skRamp{animation:pathRamp 5.6s linear infinite}
+/* blue path -- up the ramp, lands on the deck platform, picks his board
+   back up, then drops in. 7s matches the 'deckout' trick's own 7000ms. */
+#skRamp{animation:pathRamp 7s linear infinite}
 @keyframes pathRamp{
-  0%{left:-4.06%;top:63.17%}  16%{left:3.44%;top:58.73%}  30%{left:9.06%;top:52.06%}
-  40%{left:13.44%;top:45.39%} 50%{left:16.25%;top:35.95%} 58%{left:14.69%;top:41.50%}
-  64%{left:13.44%;top:45.95%} 70%{left:11.56%;top:49.28%} 80%{left:5.31%;top:57.06%}
-  100%{left:-4.06%;top:63.17%}}
+  0%{left:-12.81%;top:67.61%;transform:scaleX(1)}
+  8%{left:-4.69%;top:63.72%}   14%{left:3.44%;top:58.72%}
+  20%{left:9.69%;top:51.50%}   24%{left:12.81%;top:45.94%}
+  31%{left:15.31%;top:39.28%}  37%{left:17.19%;top:34.83%}
+  43%{left:19.06%;top:42.61%}  49%{left:19.69%;top:42.61%;transform:scaleX(1)}
+  56%{left:20.31%;top:42.61%;transform:scaleX(-1)}
+  70%{left:20.31%;top:42.61%}  78%{left:19.06%;top:42.61%}
+  84%{left:17.19%;top:42.61%}  90%{left:15.94%;top:42.61%}
+  94%{left:12.81%;top:46.50%}  97%{left:0.31%;top:61.50%}
+  100%{left:-12.81%;top:67.61%;transform:scaleX(-1)}}
 
 /* green path -- in from off-screen right, down the handrail, rolls out */
 #skRail{animation:pathRail 6.6s linear infinite}
@@ -1946,7 +1953,9 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     grind:  {head:[46,30],neck:[47,38],hip:[50,57],kL:[40,63],fL:[39,73],kR:[60,63],fR:[62,73],eL:[36,42],hL:[26,40],eR:[60,44],hR:[72,38]},
     hypeA:  {head:[50,22],neck:[50,31],hip:[50,52],kL:[43,64],fL:[40,76],kR:[57,64],fR:[61,76],eL:[41,24],hL:[37,12],eR:[59,24],hR:[63,12]},
     hypeB:  {head:[50,23],neck:[50,32],hip:[50,53],kL:[43,65],fL:[40,76],kR:[57,65],fR:[61,76],eL:[40,30],hL:[33,22],eR:[60,30],hR:[67,22]},
-    fall:   {head:[36,50],neck:[42,48],hip:[58,50],kL:[66,40],fL:[74,34],kR:[68,56],fR:[78,58],eL:[38,38],hL:[30,34],eR:[44,58],hR:[36,64]}
+    fall:   {head:[36,50],neck:[42,48],hip:[58,50],kL:[66,40],fL:[74,34],kR:[68,56],fR:[78,58],eL:[38,38],hL:[30,34],eR:[44,58],hR:[36,64]},
+    pickup: {head:[44,42],neck:[46,49],hip:[52,60],kL:[46,66],fL:[42,76],kR:[58,66],fR:[60,76],eL:[41,56],hL:[36,70],eR:[55,57],hR:[50,70]},
+    carry:  {head:[50,22],neck:[50,31],hip:[50,52],kL:[43,64],fL:[40,76],kR:[57,64],fR:[61,76],eL:[43,41],hL:[40,48],eR:[57,41],hR:[60,48]}
   };
   // keyframes: t (0..1 of the loop), pose, dy (body lift), board {dy, rot, flip (turns), spin (turns), dx}, rot (body rotation deg), spin (body turns)
   const T = {
@@ -1957,6 +1966,16 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     grind:   {ms:1100, k:[[0,'grind',0],[0.5,'grind',1.5],[1,'grind',0]], rail:true, sparks:true, roll:true},
     spin900: {ms:2200, k:[[0,'stand',0],[0.14,'crouch',0],[0.26,'tuck',-20,{},0,0],[0.72,'tuck',-26,{},0,2.5],[0.84,'crouch',0,{},0,2.5],[1,'stand',0,{},0,2.5]], ramp:true},
     hype:    {ms:700,  k:[[0,'hypeA',0,{hold:true}],[0.5,'hypeB',-6,{hold:true}],[1,'hypeA',0,{hold:true}]], confetti:true},
+    // rides up, airs off the lip, lands on the deck platform on his feet,
+    // the board lands beside him -- he picks it up, carries it, sets it
+    // down and rolls back in. ms matches the CSS path so the two stay in step.
+    deckout: {ms:7000, k:[
+      [0,'stand',0], [0.20,'stand',0], [0.26,'crouch',0],
+      [0.32,'air',-14,{rot:-18}], [0.37,'air',-20,{gap:6,rot:-10,dx:3}],
+      [0.43,'crouch',0,{ground:1,dx:16,rot:8}], [0.49,'stand',0,{ground:1,dx:16,rot:8}],
+      [0.56,'pickup',0,{ground:1,dx:13,rot:8}], [0.62,'pickup',0,{hold:1}],
+      [0.70,'carry',0,{hold:1}], [0.78,'carry',0,{hold:1}],
+      [0.84,'crouch',0,{ground:1,dx:0}], [0.90,'crouch',0], [1,'stand',0]]},
     bail:    {ms:1900, k:[[0,'stand',0],[0.15,'crouch',0],[0.3,'air',-18,{rot:-16}],[0.45,'air',-20,{gap:8,rot:40,dx:10}],[0.62,'fall',-4,{ground:1,rot:170,dx:20},-40],[0.8,'fall',6,{ground:1,rot:180,dx:24},-10],[1,'fall',6,{ground:1,rot:180,dx:24},-10]], stars:true}
   };
   const lerp = (a,b,t) => a + (b-a)*t;
@@ -3573,7 +3592,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
     scn.children[0].style.display = 'none';                 // ground dashes
     if (trick === 'grind' && scn.children[1]) scn.children[1].style.display = 'none';  // its own rail
   }
-  ride('skRamp', 'kickflip');
+  ride('skRamp', 'deckout');
   ride('skRail', 'grind');
   ride('skIdle', 'idle');
 })();
