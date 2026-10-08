@@ -58,25 +58,27 @@ def bat(c, ox, oy, ph):
 
 
 def perched(c, ox, oy, ph):
-    """Perched facing the viewer. The silhouette is FIXED -- only the hem of
-    the cloak moves. Animating the whole outline makes it pulse like a
-    loading spinner instead of sitting still in a breeze."""
-    # fixed cloak: a steady trapezoid falling from the shoulders
+    """Perched facing the viewer, cloak narrower and blown to the left.
+
+    The silhouette stays FIXED -- animating the whole outline makes it pulse
+    like a loading spinner. Only the trailing edge drifts."""
+    # narrow cloak, hanging further left than right as if the wind pushes it
     for y in range(int(-12 * K), int(5 * K) + 1):
         t = (y - (-12 * K)) / (17 * K)
-        reach = (2.4 + t * 7.0) * K * 1.55
-        c.rect(ox - reach, oy + y, reach * 2, 1, CLOAK)
+        left = (2.0 + t * 5.4) * K * 1.5          # longer, trailing side
+        right = (1.6 + t * 2.0) * K * 1.5         # tucked against the body
+        c.rect(ox - left, oy + y, left + right, 1, CLOAK)
 
-    # only the bottom couple of rows flutter, and only by a pixel
+    # the trailing left edge ripples; the right side stays put
     hemy = int(5 * K)
-    for s_ in (-1, 1):
-        base = (2.4 + 7.0) * K * 1.55
-        for i, yy in enumerate((hemy, hemy + 1)):
-            lift = math.sin(ph + s_ * 1.1 + i * 0.9)
-            w = base + (1 if lift > 0.35 else 0)
-            if lift < -0.55:
-                continue                      # a corner of the hem lifts away
-            c.rect(ox + (0 if s_ > 0 else -w), oy + yy, w, 1, CLOAK)
+    for i, yy in enumerate((hemy, hemy + 1)):
+        base = (2.0 + 5.4) * K * 1.5
+        gust = math.sin(ph + i * 0.8)
+        w = base + (1 if gust > 0.2 else 0) + (1 if gust > 0.75 else 0)
+        c.rect(ox - w, oy + yy, w, 1, CLOAK)
+    # a wisp torn off the trailing edge, drifting further left
+    wisp = int(2 + (math.sin(ph * 1.1) + 1) * 1.5)
+    c.rect(ox - (2.0 + 5.4) * K * 1.5 - wisp, oy + hemy - 1, wisp, 1, CLOAK)
 
     # body, knees up, feet on the ledge -- all static
     c.rect(ox - 3, oy - 9 * K - 2, 6, 9 * K + 2, BODY)
