@@ -835,6 +835,96 @@ def build(night=False, sky=True):
     c.rect(206, 116, 4, 3, ink); c.rect(206, 116, 3, 2, hx('#8e97a3'))
     c.rect(209, 115, 2, 1, ink)
 
+    # ---------------- graffiti pass ---------------------------------------
+    # Painted over the finished structures so it sits ON them. Everything
+    # here is original: invented words, simple faces, stars, arrows and
+    # abstract throwies. Kept to the wall, ramp fascia, stair side, the
+    # funbox and the distant blocks -- never across a riding surface.
+    NEON = ['#ff2fb0', '#19c7c7', '#3ddc84', '#ffd21f', '#ff8a1e',
+            '#a855f7', '#6ad3ff', '#ffffff']
+
+    def worn(x, y, w, h, n=3):
+        """scuff a few pixels back toward the surface so paint looks aged"""
+        for i in range(n):
+            c.set(x + (i * 7 + 3) % max(1, w), y + (i * 5 + 1) % max(1, h),
+                  hx(P['wall_d']), .55)
+
+    def drips(x, y, cols, col):
+        for i, dx in enumerate(cols):
+            c.rect(x + dx, y, 1, 2 + (i % 3), hx(col), .8)
+
+    def star(x, y, col):
+        for ry, row in enumerate(('..#..', '.###.', '#####', '.#.#.', '#...#')):
+            for rx, v in enumerate(row):
+                if v == '#':
+                    c.set(x + rx, y + ry, hx(col), .9)
+
+    def arrow(x, y, col, flip=False):
+        f = -1 if flip else 1
+        c.rect(x, y + 2, 9, 2, hx(col), .9)
+        for i in range(3):
+            c.rect(x + (8 - i) * f if not flip else x + i, y + i, 1, 6 - i * 2, hx(col), .9)
+
+    def face(x, y, col):
+        """a scrawled cartoon head -- outline, two eyes, a crooked grin"""
+        for ry, row in enumerate(('.###.', '#...#', '#.#.#', '#...#',
+                                  '#.#.#', '.###.')):
+            for rx, v in enumerate(row):
+                if v == '#':
+                    c.set(x + rx, y + ry, hx(col), .92)
+        c.set(x + 1, y + 2, hx('#ffffff'))
+        c.set(x + 3, y + 2, hx('#ffffff'))
+
+    def throwie(x, y, w, h, fill, edge):
+        c.fellipse(x, y, w, h, hx(edge), .9)
+        c.fellipse(x, y - 1, w - 2, h - 2, hx(fill), .9)
+        c.line((x - w + 2, y + 1), (x + w - 3, y - 2), hx('#ffffff'), 1, .35)
+
+    def deck_tag(x, y, col):
+        """a little board scrawl: deck, two wheels"""
+        c.rect(x, y, 9, 2, hx(col), .9)
+        c.set(x + 1, y + 2, hx(col)); c.set(x + 7, y + 2, hx(col))
+
+    # --- back wall, in the gaps between the existing pieces ---------------
+    text(c, 48, 99, 'KRUZ', hx(NEON[1]), px=1, ink=ink); worn(48, 99, 24, 7)
+    drips(48, 106, (2, 9, 17), NEON[1])
+    star(78, 99, NEON[3])
+    face(90, 99, NEON[0])
+    text(c, 48, 109, 'DUSK', hx(NEON[5]), px=1, ink=ink); worn(48, 109, 24, 7)
+    arrow(76, 110, NEON[4])
+    deck_tag(90, 111, NEON[2])
+
+    text(c, 184, 99, 'HAZE', hx(NEON[2]), px=1, ink=ink); worn(184, 99, 24, 7)
+    star(212, 100, NEON[6])
+    text(c, 184, 109, 'ZONK', hx(NEON[3]), px=1, ink=ink); worn(184, 109, 24, 7)
+    face(212, 108, NEON[2])
+    throwie(222, 104, 7, 4, NEON[5], NEON[0])
+
+    # LOCALS/ONLY already sit at 232; this drops into the gap below them
+    text(c, 258, 109, 'SKID', hx(NEON[0]), px=1, ink=ink); worn(258, 109, 24, 7)
+    arrow(262, 99, NEON[1], flip=True)
+    star(276, 98, NEON[7])
+
+    # --- ramp fascia (beside the riding surface, never on it) -------------
+    star(74, 131, NEON[6])
+    deck_tag(84, 133, NEON[0])
+    drips(74, 136, (0, 5), NEON[6])
+
+    # --- stair stringer wall ----------------------------------------------
+    star(st_x - 47, st_y + 29, NEON[3])
+    throwie(st_x - 26, st_y + 27, 5, 3, NEON[1], NEON[7])
+    deck_tag(st_x - 40, st_y + 14, NEON[2])
+
+    # --- funbox side -------------------------------------------------------
+    text(c, 146, 124, 'SODA', hx(NEON[6]), px=1, ink=ink); worn(146, 124, 24, 7)
+    star(176, 125, NEON[0])
+
+    # --- distant blocks: just specks of colour at this range ---------------
+    for bx, by, col in ((12, 82, NEON[0]), (46, 74, NEON[2]), (58, 86, NEON[3]),
+                        (228, 80, NEON[1]), (260, 72, NEON[5]), (300, 84, NEON[4])):
+        c.rect(bx, by, 3, 2, hx(col), .8)
+        c.set(bx + 1, by + 2, hx(col), .5)
+
     # floodlight towers rising behind the fence
     for lx in (34, 286):
         c.rect(lx - 1, 34, 3, 84, ink)
