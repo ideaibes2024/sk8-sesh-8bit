@@ -686,31 +686,92 @@ def build(night=False, sky=True):
     c.rect(fb_x + 5, fb_y - 11, fb_w - 10, 2, hx('#ff2fb0'))
     c.rect(fb_x + 5, fb_y - 11, fb_w - 10, 1, hx('#ff8ad0'))
 
-    # ---------------- stairs + hubba ledge (right) ------------------------
+    # ---------------- stairs + handrail (right) ---------------------------
+    # Tread positions, the top platform and the handrail line are what the
+    # rail skater's climb and grind are tuned to -- none of it moves. The
+    # detailing lives on the risers, the side and the floor.
     st_x, st_y = 300, 122          # top of the set, descending to the left
     RAIL_A, RAIL_B = (st_x - 56, st_y + 34), (st_x - 4, st_y - 6)
     RAIL_ANG = math.degrees(math.atan2(RAIL_B[1] - RAIL_A[1], RAIL_B[0] - RAIL_A[0]))
     steps = 5
+
+    # shadow pooling at the foot of the set
+    c.rect(st_x - 62, st_y + 36, 40, 3, hx('#9d968b'), .5)
+    c.rect(st_x - 58, st_y + 39, 32, 2, hx('#aba49a'), .3)
+
     for i in range(steps):
         sx = st_x - (i + 1) * 11
         sy = st_y + i * 7
         c.rect(sx, sy, W - sx, 7, hx('#aba59a'))
-        c.rect(sx, sy, W - sx, 2, hx('#ded8cd'))
+        c.rect(sx, sy, W - sx, 2, hx('#ded8cd'))      # lit tread
         c.rect(sx, sy, W - sx, 1, ink)
-        c.vline(sx, sy, sy + 6, ink)
-        c.rect(sx + 1, sy + 2, W - sx - 1, 5, hx('#938d84'), .45)
-        c.rect(sx, sy + 6, W - sx, 1, hx('#746e66'))
+        c.vline(sx, sy, sy + 6, ink)                  # nose
+        c.rect(sx + 1, sy + 2, W - sx - 1, 5, hx('#938d84'), .45)   # riser
+        c.rect(sx, sy + 6, W - sx, 1, hx('#6d675f'))  # dark edge beneath
+        # chipped nose + worn patches where everyone lands
+        c.rect(sx + 1, sy, 3, 1, hx('#f0eade'))
+        c.rect(sx + 5 + (i * 3) % 7, sy + 1, 4, 1, hx('#8d877e'), .5)
+        for k in range(2):                            # speckle on the riser
+            c.set(sx + 4 + (i * 5 + k * 9) % 18, sy + 3 + k, hx('#7d776f'), .6)
+        # hairline cracks running down a couple of risers
+        if i in (1, 3):
+            cx_ = sx + 9 + i
+            c.set(cx_, sy + 2, hx('#6d675f'))
+            c.set(cx_ + 1, sy + 3, hx('#6d675f'))
+            c.set(cx_ + 1, sy + 4, hx('#6d675f'))
+
+    # top platform
     c.rect(st_x - 11, st_y - 7, W - st_x + 11, 7, hx('#c6c0b5'))
     c.rect(st_x - 11, st_y - 7, W - st_x + 11, 1, ink)
-    # handrail bolted along the noses of the steps
+    c.rect(st_x - 11, st_y - 6, W - st_x + 11, 1, hx('#e6e0d5'))
+
+    # --- the stringer wall down the side of the set, where tags go --------
+    for i in range(steps):
+        sx = st_x - (i + 1) * 11
+        sy = st_y + i * 7
+        c.rect(sx - 4, sy + 2, 4, (steps - i) * 7, hx('#9a948a'))
+        c.rect(sx - 4, sy + 2, 1, (steps - i) * 7, ink)
+    # graffiti tags and skate stickers along that wall
+    c.rect(st_x - 30, st_y + 16, 7, 4, ink)
+    c.rect(st_x - 29, st_y + 17, 5, 2, hx('#ff2fb0'))
+    c.fellipse(st_x - 43, st_y + 25, 4, 3, ink)
+    c.fellipse(st_x - 43, st_y + 25, 3, 2, hx('#19c7c7'))
+    c.rect(st_x - 19, st_y + 9, 5, 3, hx('#3ddc84'))
+    c.rect(st_x - 19, st_y + 9, 5, 1, ink)
+    for tx, ty in ((st_x - 52, st_y + 30), (st_x - 36, st_y + 21)):
+        c.rect(tx, ty, 6, 1, hx('#ffd21f'), .8)
+        c.rect(tx + 1, ty + 1, 4, 1, hx('#ffd21f'), .5)
+
+    # --- debris scattered at the base --------------------------------------
+    for dx, dy, dw in ((st_x - 60, st_y + 37, 2), (st_x - 54, st_y + 39, 1),
+                       (st_x - 47, st_y + 38, 2), (st_x - 66, st_y + 38, 1)):
+        c.rect(dx, dy, dw, 1, hx('#8d877e'))
+    c.rect(st_x - 57, st_y + 36, 3, 1, hx('#ff8a1e'))     # a lost sticker
+
+    # --- handrail bolted along the noses of the steps ----------------------
     for i in range(4):
         rx = st_x - 50 + i * 15
         ry = st_y + 36 - i * 10.5
         c.rect(rx, ry - 13, 3, 13, ink)
         c.rect(rx, ry - 13, 2, 13, hx('#b9b3a8'))
+        c.rect(rx, ry - 13, 1, 13, hx('#e2dcd2'))
+        c.rect(rx - 1, ry - 1, 5, 2, ink)                 # base plate
+        c.rect(rx - 1, ry - 1, 5, 1, hx('#8f97a3'))
     c.line(RAIL_A, RAIL_B, ink, 5)
     c.line(RAIL_A, RAIL_B, hx('#ffd21f'), 3)
     c.line((RAIL_A[0], RAIL_A[1] - 1), (RAIL_B[0], RAIL_B[1] - 1), hx('#fff3a8'), 1, .8)
+
+    # --- a short grindable flat bar set beside the stairs ------------------
+    gb_y = st_y + 34
+    for bx in (st_x - 78, st_x - 64):
+        c.rect(bx, gb_y + 1, 2, 7, ink)
+        c.rect(bx, gb_y + 1, 1, 7, hx('#6e767f'))
+        c.rect(bx - 1, gb_y + 8, 4, 1, hx('#6d675f'))     # foot plate
+    c.rect(st_x - 82, gb_y - 2, 24, 3, ink)
+    c.rect(st_x - 81, gb_y - 1, 22, 2, hx('#b9c2cb'))
+    c.rect(st_x - 81, gb_y - 1, 22, 1, hx('#e8eef4'))     # polished top
+    c.rect(st_x - 74, gb_y - 1, 7, 1, hx('#9aa3ad'))      # waxed patch
+    c.fellipse(st_x - 70, gb_y + 10, 13, 2, hx('#000000'), .18)
 
     # (the bowl used to sit here; removed -- it read as a hole in the floor)
 
