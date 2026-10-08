@@ -484,7 +484,7 @@ def build(night=False, sky=True):
 
     # birds
     if not night and sky:
-        for bx_, by_, sc in ((150, 44, 1), (162, 38, 1), (174, 47, 1), (96, 30, 1)):
+        for bx_, by_, sc in ((96, 36, 1), (108, 30, 1), (120, 40, 1), (204, 28, 1)):
             c.line((bx_ - 3 * sc, by_), (bx_, by_ - 2 * sc), OUT2, 1)
             c.line((bx_, by_ - 2 * sc), (bx_ + 3 * sc, by_), OUT2, 1)
 
@@ -516,7 +516,10 @@ def build(night=False, sky=True):
             c.line((px_ + dx * .6, top + dy * .6), (px_ + dx, top + dy), hx(P['palm_d']), 1)
         c.fcircle(px_, top, 2, hx('#c8863a'))
 
-    for px_, h_ in ((88, 34), (112, 26), (196, 30), (176, 22), (310, 28), (18, 24)):
+    # evenly spaced along the back line, heights alternating so the tops
+    # make a rhythm instead of two clumps
+    for px_, h_ in ((18, 24), (62, 31), (106, 26), (158, 22),
+                    (206, 33), (258, 25), (310, 29)):
         palm(px_, sky_line + 2, h_)
 
     # ---------------- graffiti back wall ---------------------------------
@@ -533,17 +536,20 @@ def build(night=False, sky=True):
     for i in range(0, W, 7):
         c.rect(i + (i % 5), wall_bot - 6 + (i % 3), 2, 4, hx(P['wall_d']), .35)
 
+    # The wall is read left to right, so the pieces are laid out in lanes
+    # with clear wall between them -- nothing overlaps its neighbour.
+    #   8  SK8 | 54 KRUZ/DUSK | 124 SESH | 182 HAZE/ZONK | 215 throwie
+    #   244 LOCALS/ONLY | 292 OZ      (the gaps get the small marks)
     tagink = OUT
-    text(c, 10, wall_top + 4, 'SK8', hx('#ff2fb0'), px=2, ink=tagink)
-    text(c, 10, wall_top + 4 + 16, 'SESH', hx('#ffd21f'), px=1, ink=tagink)
-    text(c, 118, wall_top + 5, 'SESH', hx('#19c7c7'), px=2, ink=tagink)
-    text(c, 232, wall_top + 4, 'LOCALS', hx('#3ddc84'), px=1, ink=tagink)
-    text(c, 232, wall_top + 13, 'ONLY', hx('#ff8a1e'), px=1, ink=tagink)
-    text(c, 290, wall_top + 5, 'OZ', hx('#ffffff'), px=2, ink=tagink)
-    # abstract throwie
-    c.fellipse(205, wall_top + 11, 13, 7, hx('#a855f7'))
-    c.fellipse(205, wall_top + 10, 11, 5, hx('#ff2fb0'))
-    c.line((196, wall_top + 16), (214, wall_top + 6), hx('#ffffff'), 1, .8)
+    text(c, 8, wall_top + 4, 'SK8', hx('#ff2fb0'), px=2, ink=tagink)
+    text(c, 124, wall_top + 3, 'SESH', hx('#19c7c7'), px=2, ink=tagink)
+    text(c, 244, wall_top + 4, 'LOCALS', hx('#3ddc84'), px=1, ink=tagink)
+    text(c, 244, wall_top + 13, 'ONLY', hx('#ff8a1e'), px=1, ink=tagink)
+    text(c, 292, wall_top + 5, 'OZ', hx('#ffffff'), px=2, ink=tagink)
+    # abstract throwie, centred in the gap between ZONK and LOCALS
+    c.fellipse(226, wall_top + 11, 12, 7, hx('#a855f7'))
+    c.fellipse(226, wall_top + 10, 10, 5, hx('#ff2fb0'))
+    c.line((218, wall_top + 16), (234, wall_top + 6), hx('#ffffff'), 1, .8)
 
     # ---------------- ground ---------------------------------------------
     c.rect(0, wall_bot, W, H - wall_bot, hx(P['ground']))
@@ -666,6 +672,9 @@ def build(night=False, sky=True):
 
     # ---------------- funbox + ledge (centre back) ------------------------
     fb_x, fb_y, fb_w = 138, 122, 64
+    # cast shadow so the box plants on the concrete instead of hovering
+    c.fellipse(fb_x + fb_w / 2, fb_y + 13, fb_w / 2 + 14, 4, hx('#000000'), .16)
+    c.rect(fb_x - 10, fb_y + 10, fb_w + 20, 2, hx('#9d968b'), .45)
     c.rect(fb_x, fb_y, fb_w, 10, hx('#b9b3a8'))
     c.rect(fb_x, fb_y, fb_w, 2, hx('#ded8cd'))
     c.rect(fb_x, fb_y, fb_w, 1, ink)
@@ -679,12 +688,13 @@ def build(night=False, sky=True):
     # ledge coping edge
     c.rect(fb_x, fb_y + 1, fb_w, 2, hx('#ffd21f'))
     c.rect(fb_x, fb_y + 1, fb_w, 1, ink)
-    # rail across the box
-    c.rect(fb_x + 6, fb_y - 9, 2, 9, ink)
-    c.rect(fb_x + fb_w - 8, fb_y - 9, 2, 9, ink)
-    c.rect(fb_x + 4, fb_y - 11, fb_w - 8, 3, ink)
-    c.rect(fb_x + 5, fb_y - 11, fb_w - 10, 2, hx('#ff2fb0'))
-    c.rect(fb_x + 5, fb_y - 11, fb_w - 10, 1, hx('#ff8ad0'))
+    # rail across the box -- sits 3px lower than it used to so it stops
+    # cutting through the bottom of the SESH tag on the wall behind it
+    c.rect(fb_x + 6, fb_y - 6, 2, 6, ink)
+    c.rect(fb_x + fb_w - 8, fb_y - 6, 2, 6, ink)
+    c.rect(fb_x + 4, fb_y - 8, fb_w - 8, 3, ink)
+    c.rect(fb_x + 5, fb_y - 8, fb_w - 10, 2, hx('#ff2fb0'))
+    c.rect(fb_x + 5, fb_y - 8, fb_w - 10, 1, hx('#ff8ad0'))
 
     # ---------------- stairs + handrail (right) ---------------------------
     # Tread positions, the top platform and the handrail line are what the
@@ -798,8 +808,13 @@ def build(night=False, sky=True):
 
     # cones removed: half-hidden by the control bar they read as small figures
 
+    # Props are spread across the floor rather than piled in one corner:
+    # trash can out on the left flat, the crew's gear grouped by the boombox
+    # centre-left, and a couple of odds and ends over by the stairs so the
+    # right half of the concrete isn't bare.
+
     # trash can
-    tc_x, tc_y = 104, 134
+    tc_x, tc_y = 110, 146
     c.rect(tc_x - 6, tc_y - 14, 12, 16, ink)
     c.rect(tc_x - 5, tc_y - 13, 10, 14, hx('#3b7f5a'))
     for i in range(-4, 5, 3):
@@ -808,32 +823,52 @@ def build(night=False, sky=True):
     c.rect(tc_x - 6, tc_y - 16, 12, 2, hx('#4a9c6e'))
 
     # boombox
-    bb_x, bb_y = 132, 140
+    bb_x, bb_y = 152, 158
     c.rect(bb_x - 11, bb_y - 9, 22, 11, ink)
     c.rect(bb_x - 10, bb_y - 8, 20, 9, hx('#2b2840'))
     c.ocircle(bb_x - 5, bb_y - 3, 2.6, hx('#6b6880'))
     c.ocircle(bb_x + 5, bb_y - 3, 2.6, hx('#6b6880'))
     c.rect(bb_x - 2, bb_y - 7, 4, 3, hx('#19c7c7'))
     c.line((bb_x - 7, bb_y - 9), (bb_x + 7, bb_y - 9), ink, 2)
-    for i, (nx_, ny_) in enumerate(((bb_x - 17, bb_y - 15), (bb_x + 16, bb_y - 18))):
+    for i, (nx_, ny_) in enumerate(((bb_x - 14, bb_y - 14), (bb_x + 13, bb_y - 17))):
         c.rect(nx_, ny_, 3, 3, hx('#ffffff'), .85)
         c.rect(nx_ + 2, ny_ - 4, 1, 5, hx('#ffffff'), .85)
 
-    # backpack + soda can
-    c.rect(146, 150, 10, 8, ink)
-    c.rect(147, 151, 8, 6, hx('#6b4a9e'))
-    c.rect(149, 149, 4, 2, hx('#a855f7'))
-    c.rect(162, 154, 3, 5, ink)
-    c.rect(162, 154, 2, 4, hx('#ff2fb0'))
+    # backpack + soda can, set down beside the boombox as one little camp
+    c.rect(170, 154, 10, 8, ink)
+    c.rect(171, 155, 8, 6, hx('#6b4a9e'))
+    c.rect(173, 153, 4, 2, hx('#a855f7'))
+    c.rect(186, 158, 3, 5, ink)
+    c.rect(186, 158, 2, 4, hx('#ff2fb0'))
 
-    # spare deck leaning on the wall
-    c.line((124, 118), (130, 100), ink, 5)
-    c.line((124, 118), (130, 100), hx('#19c7c7'), 3)
-    c.ocircle(124, 119, 1.3, hx('#ffe14a'))
+    # spare deck leaning on the wall, in the clear gap left of the SESH tag
+    c.fellipse(112, 121, 9, 2, hx('#000000'), .20)      # contact shadow
+    c.line((109, 121), (116, 101), ink, 7)              # deck, outlined
+    c.line((109, 121), (116, 101), hx('#19c7c7'), 5)
+    c.line((110, 120), (116, 103), hx('#6ad3ff'), 1, .7)  # lit edge
+    c.fcircle(116, 100, 2.4, ink)                        # rounded nose
+    c.fcircle(116, 100, 1.6, hx('#19c7c7'))
+    for wy, wx in ((104, 113), (116, 109)):              # trucks + wheels
+        c.rect(wx, wy, 3, 2, ink)
+        c.rect(wx, wy, 2, 1, hx('#ffe14a'))
 
-    # pigeon (the dog is gone -- it read as a small figure near the floor)
-    c.rect(206, 116, 4, 3, ink); c.rect(206, 116, 3, 2, hx('#8e97a3'))
-    c.rect(209, 115, 2, 1, ink)
+    # --- odds and ends on the right-hand concrete --------------------------
+    # a board left lying flat
+    c.rect(250, 152, 16, 3, ink)
+    c.rect(251, 153, 14, 1, hx('#3ddc84'))
+    c.rect(252, 155, 2, 1, hx('#ffe14a')); c.rect(262, 155, 2, 1, hx('#ffe14a'))
+    c.fellipse(258, 157, 10, 2, hx('#000000'), .16)
+    # a water bottle stood up next to it
+    c.rect(272, 148, 4, 8, ink)
+    c.rect(272, 149, 3, 6, hx('#6ad3ff'))
+    c.rect(273, 146, 2, 2, hx('#ff8a1e'))
+    # chalked lines where someone marked out a line to run
+    c.rect(226, 164, 14, 1, hx('#d8d2c6'), .35)
+    c.rect(246, 168, 10, 1, hx('#d8d2c6'), .28)
+
+    # pigeon, up on the funbox rail where it reads against open wall
+    c.rect(174, 111, 4, 3, ink); c.rect(174, 111, 3, 2, hx('#8e97a3'))
+    c.rect(177, 110, 2, 1, ink)
 
     # ---------------- graffiti pass ---------------------------------------
     # Painted over the finished structures so it sits ON them. Everything
@@ -886,31 +921,29 @@ def build(night=False, sky=True):
         c.set(x + 1, y + 2, hx(col)); c.set(x + 7, y + 2, hx(col))
 
     # --- back wall, in the gaps between the existing pieces ---------------
-    text(c, 48, 99, 'KRUZ', hx(NEON[1]), px=1, ink=ink); worn(48, 99, 24, 7)
-    drips(48, 106, (2, 9, 17), NEON[1])
-    star(78, 99, NEON[3])
-    face(90, 99, NEON[0])
-    text(c, 48, 109, 'DUSK', hx(NEON[5]), px=1, ink=ink); worn(48, 109, 24, 7)
-    arrow(76, 110, NEON[4])
-    deck_tag(90, 111, NEON[2])
+    # lane 2 (54..78), with the small marks filling 82..98
+    text(c, 54, 99, 'KRUZ', hx(NEON[1]), px=1, ink=ink); worn(54, 99, 24, 7)
+    drips(54, 106, (2, 9, 17), NEON[1])
+    text(c, 54, 109, 'DUSK', hx(NEON[5]), px=1, ink=ink); worn(54, 109, 24, 7)
+    star(84, 99, NEON[3])
+    face(92, 99, NEON[0])
+    arrow(84, 109, NEON[4])
 
-    text(c, 184, 99, 'HAZE', hx(NEON[2]), px=1, ink=ink); worn(184, 99, 24, 7)
-    star(212, 100, NEON[6])
-    text(c, 184, 109, 'ZONK', hx(NEON[3]), px=1, ink=ink); worn(184, 109, 24, 7)
-    face(212, 108, NEON[2])
-    throwie(222, 104, 7, 4, NEON[5], NEON[0])
+    # lane 4 (182..206), marks in 210..214
+    text(c, 182, 99, 'HAZE', hx(NEON[2]), px=1, ink=ink); worn(182, 99, 24, 7)
+    text(c, 182, 109, 'ZONK', hx(NEON[3]), px=1, ink=ink); worn(182, 109, 24, 7)
+    star(210, 99, NEON[6])
+    deck_tag(209, 110, NEON[2])
 
-    # LOCALS/ONLY already sit at 232; this drops into the gap below them
-    text(c, 258, 109, 'SKID', hx(NEON[0]), px=1, ink=ink); worn(258, 109, 24, 7)
-    arrow(262, 99, NEON[1], flip=True)
-    star(276, 98, NEON[7])
+    # the only mark in the LOCALS/OZ stretch -- that end of the wall is busy
+    star(283, 107, NEON[7])
 
     # --- ramp fascia (beside the riding surface, never on it) -------------
-    star(74, 131, NEON[6])
-    deck_tag(84, 133, NEON[0])
-    drips(74, 136, (0, 5), NEON[6])
+    star(74, 124, NEON[6])
+    deck_tag(89, 133, NEON[0])
 
-    # --- stair stringer wall ----------------------------------------------
+    # --- stair stringer wall (SKID dropped: the rail cuts straight through
+    # that strip, and the wall above was already full) ---------------------
     star(st_x - 47, st_y + 29, NEON[3])
     throwie(st_x - 26, st_y + 27, 5, 3, NEON[1], NEON[7])
     deck_tag(st_x - 40, st_y + 14, NEON[2])
@@ -970,14 +1003,15 @@ def build(night=False, sky=True):
             c.fellipse(lx, 152, 30, 13, hx('#ffe9b8'), .10)
         # neon on the back wall
         for i in range(2):
-            c.glow(30, 108, 22, hx('#ff2fb0'), .28)
-            c.glow(150, 106, 22, hx('#19c7c7'), .24)
-            c.glow(300, 104, 18, hx('#ffffff'), .18)
-        text(c, 10, 100, 'SK8', hx('#ff8ad0'), px=2, ink=None)
-        text(c, 118, 101, 'SESH', hx('#8ef4f4'), px=2, ink=None)
+            c.glow(26, 106, 22, hx('#ff2fb0'), .28)
+            c.glow(148, 105, 24, hx('#19c7c7'), .24)
+            c.glow(302, 104, 18, hx('#ffffff'), .18)
+        text(c, 8, 100, 'SK8', hx('#ff8ad0'), px=2, ink=None)
+        text(c, 124, 99, 'SESH', hx('#8ef4f4'), px=2, ink=None)
+        # pooled light under the gear and over by the stairs
         c.glow(50, 168, 16, hx('#19c7c7'), .3)
-        c.glow(256, 157, 26, hx('#ff2fb0'), .22)
-        c.glow(92, 158, 30, hx('#2d6cdf'), .2)
+        c.glow(258, 154, 26, hx('#ff2fb0'), .22)
+        c.glow(120, 154, 30, hx('#2d6cdf'), .2)
 
     # vignette so the UI reads on top
     for y in range(H):
@@ -1071,6 +1105,17 @@ def to_png(c, path, zoom=3):
 
 if __name__ == '__main__':
     want_png = '--png' in sys.argv
+    # park-*.svg are what the page actually loads: no sky, because the page
+    # animates a live day cycle behind them. scene-*.svg are the full-frame
+    # versions, handy for eyeballing the composition in one picture.
+    for name, night in (('park-day', False), ('park-night', True)):
+        c = build(night, sky=False)
+        quantize(c)
+        svg = to_svg(c)
+        with open(os.path.join(ROOT, name + '.svg'), 'w') as f:
+            f.write(svg)
+        print('%s.svg  %d KB' % (name, len(svg) // 1024))
+
     for name, night in (('scene-day', False), ('scene-night', True)):
         c = build(night)
         quantize(c)
