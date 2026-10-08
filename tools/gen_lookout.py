@@ -27,6 +27,19 @@ BODY = hx('#0d0a16')
 TRIM = hx('#5b4f94')
 SKIN = hx('#caa882')
 
+# Night Man's palette (matches tools/gen_nightman.py)
+NM_NAVY = hx('#1e2a52')
+NM_NAVY_D = hx('#131a34')
+NM_NAVY_L = hx('#2f4078')
+NM_BLK = hx('#080a12')
+NM_SILVER = hx('#c6ccdc')
+NM_SILVER_D = hx('#8b93a8')
+NM_VISOR = hx('#6ad3ff')
+NM_VISOR_L = hx('#c3ecff')
+NM_CAPE = hx('#0f1536')
+NM_CAPE_F = hx('#1a2254')
+NM_CAPE_E = hx('#080b1e')
+
 
 def save(c, path):
     from PIL import Image
@@ -58,36 +71,54 @@ def bat(c, ox, oy, ph):
 
 
 def perched(c, ox, oy, ph):
-    """Perched facing the viewer, cloak narrower and blown to the left.
+    """Night Man standing watch on the rooftop, cape streaming left.
 
-    The silhouette stays FIXED -- animating the whole outline makes it pulse
-    like a loading spinner. Only the trailing edge drifts."""
-    # narrow cloak, hanging further left than right as if the wind pushes it
-    for y in range(int(-12 * K), int(5 * K) + 1):
-        t = (y - (-12 * K)) / (17 * K)
-        left = (2.0 + t * 5.4) * K * 1.5          # longer, trailing side
-        right = (1.6 + t * 2.0) * K * 1.5         # tucked against the body
-        c.rect(ox - left, oy + y, left + right, 1, CLOAK)
+    The silhouette is FIXED -- only the cape's trailing edge drifts.
+    Animating the whole outline makes it pulse like a loading spinner.
+    Origin is at his feet."""
+    # --- cape first, behind him, swept hard left ------------------------
+    for y in range(-19, 2):
+        t = (y + 19) / 21.0
+        reach = 3 + (t ** 0.7) * 13
+        xl = int(ox - reach)
+        for x in range(xl, ox + 4):
+            band = ((ox - x) // 3) % 2
+            c.set(x, oy + y, NM_CAPE_F if band else NM_CAPE)
+        c.set(xl, oy + y, NM_CAPE_E)
+    # trailing edge ripples, plus a wisp torn off it
+    for i, yy in enumerate((-2, -1, 0)):
+        gust = math.sin(ph + i * 0.7)
+        extra = (1 if gust > 0.1 else 0) + (1 if gust > 0.7 else 0)
+        c.rect(ox - 16 - extra, oy + yy, 3 + extra, 1, NM_CAPE)
+    wisp = int(1 + (math.sin(ph * 1.2) + 1) * 1.6)
+    c.rect(ox - 18 - wisp, oy - 4, wisp, 1, NM_CAPE_E)
 
-    # the trailing left edge ripples; the right side stays put
-    hemy = int(5 * K)
-    for i, yy in enumerate((hemy, hemy + 1)):
-        base = (2.0 + 5.4) * K * 1.5
-        gust = math.sin(ph + i * 0.8)
-        w = base + (1 if gust > 0.2 else 0) + (1 if gust > 0.75 else 0)
-        c.rect(ox - w, oy + yy, w, 1, CLOAK)
-    # a wisp torn off the trailing edge, drifting further left
-    wisp = int(2 + (math.sin(ph * 1.1) + 1) * 1.5)
-    c.rect(ox - (2.0 + 5.4) * K * 1.5 - wisp, oy + hemy - 1, wisp, 1, CLOAK)
-
-    # body, knees up, feet on the ledge -- all static
-    c.rect(ox - 3, oy - 9 * K - 2, 6, 9 * K + 2, BODY)
-    c.rect(ox - 4, oy - 1, 3, 2, BODY)
-    c.rect(ox + 2, oy - 1, 3, 2, BODY)
-    c.fcircle(ox, oy - 11 * K - 2.5, 3.0 * K + 1.4, CLOAK)
-    c.fcircle(ox, oy - 11 * K - 2.2, 2.1 * K + 1.0, BODY)
-    c.rect(ox - 1, oy - 11 * K - 2.6, 2, 2, SKIN)
-    c.rect(ox - 2, oy - 5 * K - 1, 5, 1, TRIM)
+    # --- legs and boots -------------------------------------------------
+    for lx in (ox - 4, ox + 1):
+        c.rect(lx, oy - 9, 3, 7, NM_NAVY_D)
+        c.rect(lx, oy - 9, 1, 7, NM_NAVY)
+        c.rect(lx - 1, oy - 2, 5, 2, NM_BLK)
+    # --- torso, belt, emblem --------------------------------------------
+    c.rect(ox - 5, oy - 18, 10, 9, NM_NAVY_D)
+    c.rect(ox - 5, oy - 18, 5, 9, NM_NAVY)
+    c.rect(ox - 7, oy - 19, 14, 2, NM_NAVY_L)          # shoulders
+    c.rect(ox - 1, oy - 16, 2, 4, NM_SILVER)           # crescent-and-bar mark
+    c.rect(ox - 5, oy - 10, 11, 2, NM_SILVER_D)        # belt
+    c.rect(ox - 5, oy - 10, 11, 1, NM_SILVER)
+    # --- arms ------------------------------------------------------------
+    for ax in (ox - 8, ox + 6):
+        c.rect(ax, oy - 17, 2, 7, NM_NAVY_D)
+        c.rect(ax, oy - 11, 2, 2, NM_BLK)              # gauntlet
+    # --- helmet, visor, swept crest --------------------------------------
+    c.rect(ox - 3, oy - 25, 7, 7, NM_NAVY_D)
+    c.rect(ox - 3, oy - 25, 3, 7, NM_NAVY)
+    c.rect(ox - 3, oy - 25, 7, 1, NM_NAVY_L)
+    c.rect(ox - 2, oy - 19, 5, 1, NM_BLK)              # jaw
+    c.rect(ox - 2, oy - 22, 5, 2, NM_BLK)
+    c.rect(ox - 2, oy - 22, 5, 1, NM_VISOR)
+    c.set(ox - 2, oy - 22, NM_VISOR_L)
+    for i in range(4):                                  # crest blade, swept back
+        c.rect(ox - 2 - i, oy - 26, 1, 1 + (i % 2), NM_NAVY_L if i % 2 else NM_NAVY)
 
 
 def sheet(fn, frames, path):
