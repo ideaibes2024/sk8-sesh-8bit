@@ -326,6 +326,12 @@ body:has(.slot:not([hidden])){overflow:hidden}
    per-keyframe easing is what gives it weight -- linear would float. */
 .fromL #lookoutGlide{animation-name:glideInL}
 .fromR #lookoutGlide{animation-name:glideInR}
+/* one-shot arrival used by the NIGHT button: hard in from the left */
+@keyframes swooshL{
+  0%{left:-20%;top:-6%;animation-timing-function:cubic-bezier(.32,0,.85,.4)}
+  50%{left:28%;top:32%}
+  74%{left:55%;top:34%;animation-timing-function:cubic-bezier(.1,.75,.3,1)}
+  100%{left:77.19%;top:22.22%}}
 @keyframes glideInL{
   0%,26%{left:-16%;top:-6%;opacity:0}
   28%{left:-6%;top:2%;opacity:1;animation-timing-function:cubic-bezier(.3,0,.9,.35)}
@@ -3777,7 +3783,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
   (function(){
     var panel = document.getElementById('devcycle');
     if (!panel) return;
-    var tag = panel.querySelector('b');
+    var tag = panel.querySelector('b'), arrive = null;
     var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights';
     function hold(sec){
       document.querySelectorAll(CYCLED).forEach(function(e){
@@ -3791,19 +3797,39 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
       // animationPlayState covers every animation on the element, so the
       // visibility animation has to be dropped from the list outright --
       // otherwise un-pausing the cloak restarts perchHold and hides him.
-      if (g){ g.style.animation = 'none'; g.style.opacity = '0'; }
-      if (pch){ pch.style.animation = 'none';
-                pch.style.opacity = night ? '1' : '0'; }
+      clearTimeout(arrive);
+      var strip = g && g.querySelector('i');
+      if (!night){
+        if (g){ g.style.animation = 'none'; g.style.opacity = '0'; }
+        if (pch){ pch.style.animation = 'none'; pch.style.opacity = '0'; }
+      } else {
+        // fly him in from the left, fast, then hand over to the perch
+        if (pch){ pch.style.animation = 'none'; pch.style.opacity = '0'; }
+        if (g){
+          g.style.opacity = '1';
+          g.style.animation = 'none';
+          void g.offsetWidth;                       // restart the animation
+          g.style.animation = 'swooshL 1.7s linear forwards';
+          if (strip) strip.style.animation = 'glideFrames .3s steps(12) infinite';
+        }
+        arrive = setTimeout(function(){
+          if (g){ g.style.opacity = '0'; g.style.animation = 'none'; }
+          if (strip) strip.style.animation = '';
+          if (pch){ pch.style.opacity = '1'; }
+        }, 1700);
+      }
       tag.textContent = night ? 'NIGHT (PAUSED)' : 'DAY (PAUSED)';
     }
     function resume(){
+      clearTimeout(arrive);
       document.querySelectorAll(CYCLED).forEach(function(e){
         e.style.animationDelay = ''; e.style.animationPlayState = '';
       });
       ['lookoutGlide','lookoutPerch'].forEach(function(id){
         var e = document.getElementById(id);
         if (e){ e.style.opacity = ''; e.style.animation = '';
-                e.style.animationPlayState = ''; }
+                e.style.animationPlayState = '';
+                var st = e.querySelector('i'); if (st) st.style.animation = ''; }
       });
       tag.textContent = 'RUNNING';
     }

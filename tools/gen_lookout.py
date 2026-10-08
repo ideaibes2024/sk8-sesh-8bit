@@ -73,52 +73,49 @@ def bat(c, ox, oy, ph):
 def perched(c, ox, oy, ph):
     """Night Man standing watch on the rooftop, cape streaming left.
 
-    The silhouette is FIXED -- only the cape's trailing edge drifts.
-    Animating the whole outline makes it pulse like a loading spinner.
-    Origin is at his feet."""
+    Small -- roughly 20px tall. The silhouette is FIXED; only the cape's
+    trailing edge drifts, because animating the whole outline makes it
+    pulse like a loading spinner. Origin is at his feet."""
     # --- cape first, behind him, swept hard left ------------------------
-    for y in range(-19, 2):
-        t = (y + 19) / 21.0
-        reach = 3 + (t ** 0.7) * 13
+    for y in range(-14, 1):
+        t = (y + 14) / 15.0
+        reach = 2 + (t ** 0.7) * 10
         xl = int(ox - reach)
-        for x in range(xl, ox + 4):
+        for x in range(xl, ox + 3):
             band = ((ox - x) // 3) % 2
             c.set(x, oy + y, NM_CAPE_F if band else NM_CAPE)
         c.set(xl, oy + y, NM_CAPE_E)
-    # trailing edge ripples, plus a wisp torn off it
-    for i, yy in enumerate((-2, -1, 0)):
-        gust = math.sin(ph + i * 0.7)
+    for i, yy in enumerate((-1, 0)):
+        gust = math.sin(ph + i * 0.8)
         extra = (1 if gust > 0.1 else 0) + (1 if gust > 0.7 else 0)
-        c.rect(ox - 16 - extra, oy + yy, 3 + extra, 1, NM_CAPE)
-    wisp = int(1 + (math.sin(ph * 1.2) + 1) * 1.6)
-    c.rect(ox - 18 - wisp, oy - 4, wisp, 1, NM_CAPE_E)
+        c.rect(ox - 12 - extra, oy + yy, 2 + extra, 1, NM_CAPE)
+    wisp = int(1 + (math.sin(ph * 1.2) + 1) * 1.2)
+    c.rect(ox - 14 - wisp, oy - 3, wisp, 1, NM_CAPE_E)
 
     # --- legs and boots -------------------------------------------------
-    for lx in (ox - 4, ox + 1):
-        c.rect(lx, oy - 9, 3, 7, NM_NAVY_D)
-        c.rect(lx, oy - 9, 1, 7, NM_NAVY)
-        c.rect(lx - 1, oy - 2, 5, 2, NM_BLK)
+    for lx in (ox - 3, ox + 1):
+        c.rect(lx, oy - 7, 2, 5, NM_NAVY_D)
+        c.rect(lx - 1, oy - 2, 4, 2, NM_BLK)
     # --- torso, belt, emblem --------------------------------------------
-    c.rect(ox - 5, oy - 18, 10, 9, NM_NAVY_D)
-    c.rect(ox - 5, oy - 18, 5, 9, NM_NAVY)
-    c.rect(ox - 7, oy - 19, 14, 2, NM_NAVY_L)          # shoulders
-    c.rect(ox - 1, oy - 16, 2, 4, NM_SILVER)           # crescent-and-bar mark
-    c.rect(ox - 5, oy - 10, 11, 2, NM_SILVER_D)        # belt
-    c.rect(ox - 5, oy - 10, 11, 1, NM_SILVER)
-    # --- arms ------------------------------------------------------------
-    for ax in (ox - 8, ox + 6):
-        c.rect(ax, oy - 17, 2, 7, NM_NAVY_D)
-        c.rect(ax, oy - 11, 2, 2, NM_BLK)              # gauntlet
+    c.rect(ox - 4, oy - 13, 8, 6, NM_NAVY_D)
+    c.rect(ox - 4, oy - 13, 4, 6, NM_NAVY)
+    c.rect(ox - 5, oy - 14, 10, 2, NM_NAVY_L)
+    c.rect(ox, oy - 12, 1, 3, NM_SILVER)
+    c.rect(ox - 4, oy - 8, 9, 1, NM_SILVER)
+    c.rect(ox - 4, oy - 7, 9, 1, NM_SILVER_D)
+    # --- arms -------------------------------------------------------------
+    for ax in (ox - 6, ox + 5):
+        c.rect(ax, oy - 12, 2, 5, NM_NAVY_D)
+        c.rect(ax, oy - 8, 2, 1, NM_BLK)
     # --- helmet, visor, swept crest --------------------------------------
-    c.rect(ox - 3, oy - 25, 7, 7, NM_NAVY_D)
-    c.rect(ox - 3, oy - 25, 3, 7, NM_NAVY)
-    c.rect(ox - 3, oy - 25, 7, 1, NM_NAVY_L)
-    c.rect(ox - 2, oy - 19, 5, 1, NM_BLK)              # jaw
-    c.rect(ox - 2, oy - 22, 5, 2, NM_BLK)
-    c.rect(ox - 2, oy - 22, 5, 1, NM_VISOR)
-    c.set(ox - 2, oy - 22, NM_VISOR_L)
-    for i in range(4):                                  # crest blade, swept back
-        c.rect(ox - 2 - i, oy - 26, 1, 1 + (i % 2), NM_NAVY_L if i % 2 else NM_NAVY)
+    c.rect(ox - 2, oy - 19, 5, 6, NM_NAVY_D)
+    c.rect(ox - 2, oy - 19, 2, 6, NM_NAVY)
+    c.rect(ox - 2, oy - 19, 5, 1, NM_NAVY_L)
+    c.rect(ox - 1, oy - 14, 3, 1, NM_BLK)
+    c.rect(ox - 1, oy - 17, 4, 1, NM_VISOR)
+    c.set(ox - 1, oy - 17, NM_VISOR_L)
+    for i in range(3):
+        c.rect(ox - 2 - i, oy - 20, 1, 1, NM_NAVY_L if i % 2 else NM_NAVY)
 
 
 def sheet(fn, frames, path):
