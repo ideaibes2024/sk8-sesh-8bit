@@ -22,6 +22,11 @@ def hx(c):
     return (int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16))
 
 
+SKY_LINE = 96
+BUILDINGS = ((6, 18, 26), (26, 11, 17), (40, 22, 33), (64, 14, 21),
+             (222, 16, 23), (240, 12, 15), (254, 20, 30), (278, 13, 19),
+             (294, 18, 25))
+
 OUT = hx('#141414')          # universal outline ink
 OUT2 = hx('#2a2320')         # softer ink for background layers
 
@@ -485,9 +490,7 @@ def build(night=False, sky=True):
 
     # ---------------- distant skyline + palms ----------------------------
     sky_line = 96
-    for bx, bw, bh in ((6, 18, 26), (26, 11, 17), (40, 22, 33), (64, 14, 21),
-                       (222, 16, 23), (240, 12, 15), (254, 20, 30), (278, 13, 19),
-                       (294, 18, 25)):
+    for bx, bw, bh in BUILDINGS:
         c.rect(bx, sky_line - bh, bw, bh, hx(P['far']))
         c.rect(bx, sky_line - bh, bw, 1, OUT2)
         if not night:
@@ -772,6 +775,23 @@ def build(night=False, sky=True):
             d = max(abs(x - W / 2) / (W / 2), abs(y - H / 2) / (H / 2))
             if d > .72:
                 c.set(x, y, hx('#0b0714'), (d - .72) * (.9 if night else .55))
+    return c
+
+
+def build_citylights():
+    """Just the lit windows, on a transparent canvas the same size as the park
+    so it can be layered over it at the same `cover` sizing. A CSS drop-shadow
+    supplies the bloom, which keeps the windows themselves crisply pixelated."""
+    c = Canvas(W, H, KEY)
+    n = 0
+    for bx, bw, bh in BUILDINGS:
+        for wy in range(SKY_LINE - bh + 3, SKY_LINE - 2, 4):
+            for wx in range(bx + 2, bx + bw - 2, 4):
+                n += 1
+                if n % 7 == 0:                 # a few windows stay dark
+                    continue
+                warm = ('#ffe9a8', '#ffd98a', '#fff3c8')[n % 3]
+                c.rect(wx, wy, 2, 2, hx(warm))
     return c
 
 

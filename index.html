@@ -267,53 +267,38 @@ body:has(.slot:not([hidden])){overflow:hidden}
 
 /* the park itself, drawn with a transparent sky so all of that shows through */
 .park{position:absolute;inset:0;
-  background:url("park-day.svg") center bottom/cover no-repeat;
-  animation:litcycle 180s linear infinite}
-/* the ground has to follow the sky, or the concrete glows at midnight */
-@keyframes litcycle{
-  0%,22%{filter:none}
-  34%{filter:brightness(.88) saturate(1.1) hue-rotate(-8deg)}   /* sunset warmth */
-  44%{filter:brightness(.62) saturate(.85) hue-rotate(-14deg)}
-  54%,70%{filter:brightness(.42) saturate(.65) hue-rotate(-18deg)}  /* night */
-  82%{filter:brightness(.68) saturate(.9) hue-rotate(-10deg)}   /* dawn */
-  92%{filter:brightness(.92) saturate(1)}
-  100%{filter:none}}
-#sklayer{animation:litcycle 180s linear infinite}
+  background:url("park-day.svg") center bottom/cover no-repeat}
 
-/* --- floodlight towers switch on at dusk --- */
-/* #fxlayer sits above .park and below .sklayer, and deliberately carries
-   no litcycle filter -- light sources must not be dimmed by nightfall. */
-.lampglow,.lamppool,.lampbar{position:absolute;opacity:0;
+/* --- floodlight fixtures light up at dusk (the lamp itself, no spill) --- */
+.lampbar{position:absolute;opacity:0;width:5.94%;height:5.00%;top:14.44%;
+  background:#fffdf0;box-shadow:0 0 0 1px #141414;
   animation:lampcycle 180s linear infinite}
-.lampglow{width:56%;height:100%;top:-26%;
-  background:radial-gradient(closest-side,rgba(255,236,178,.92),rgba(255,224,140,.52) 32%,
-    rgba(255,214,120,.24) 56%,transparent 78%)}
-.lamppool{width:52%;height:44%;top:62%;
-  background:radial-gradient(closest-side,rgba(255,232,160,.60),rgba(255,224,140,.26) 48%,transparent 80%)}
-.lampbar{width:5.94%;height:5.00%;top:14.44%;background:#fffdf0;
-  box-shadow:0 0 0 1px #141414, 0 0 26px 10px rgba(255,236,170,.95)}
-#glowL{left:calc(10.63% - 28%)}
-#glowR{left:calc(89.38% - 28%)}
-#poolL{left:calc(10.63% - 26%)}
-#poolR{left:calc(89.38% - 26%)}
 #barL{left:7.81%}  #barR{left:86.56%}
 @keyframes lampcycle{
-  0%,28%{opacity:0}  40%{opacity:.55}  54%,70%{opacity:1}
-  82%{opacity:.5}    92%,100%{opacity:0}}
-.slot:has(.stage.bonus) .lampglow,
-.slot:has(.stage.bonus) .lamppool,
-.slot:has(.stage.bonus) .lampbar{animation:none;opacity:1}
+  0%,28%{opacity:0}  40%{opacity:.6}  54%,70%{opacity:1}
+  82%{opacity:.55}   92%,100%{opacity:0}}
+
+/* --- the skyline windows come on after dark --- */
+/* Crisp pixel windows on a transparent overlay; the drop-shadow does the
+   glowing, so the pixels themselves stay sharp. */
+.citylights{position:absolute;inset:0;opacity:0;
+  background:url("city-lights.png") center bottom/cover no-repeat;
+  filter:drop-shadow(0 0 5px rgba(255,217,138,.95))
+         drop-shadow(0 0 16px rgba(255,200,110,.55));
+  animation:lampcycle 180s linear infinite}
+
+.slot:has(.stage.bonus) .lampbar,
+.slot:has(.stage.bonus) .citylights{animation:none;opacity:1}
 @media (prefers-reduced-motion: reduce){
-  .lampglow,.lamppool,.lampbar{animation:none}}
+  .lampbar,.citylights{animation:none}}
 .slot:has(.stage.bonus) .park{background-image:url("park-night.svg")}
 /* the bonus round pins the sky to night */
 .slot:has(.stage.bonus) .sky{animation:none;background:linear-gradient(#140826,#2a0f47 55%,#45155f)}
 .slot:has(.stage.bonus) #sun{opacity:0;animation:none}
 .slot:has(.stage.bonus) #moon{animation:none;opacity:1;left:46%;top:6%}
 .slot:has(.stage.bonus) .clouds{animation:none;filter:brightness(.35) saturate(.3)}
-.slot:has(.stage.bonus) .park,.slot:has(.stage.bonus) #sklayer{animation:none;filter:none}
 @media (prefers-reduced-motion: reduce){
-  .sky,.orb,.clouds,.park,#sklayer{animation:none}}
+  .sky,.orb,.clouds{animation:none}}
 
 /* ---- stick-figure skaters riding the park backdrop ---- */
 /* Square boxes: Sk8Anim draws into a 100x100 viewBox with the board line
@@ -604,7 +589,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="sklayer" id="fxlayer"><div class="lampglow" id="glowL"></div><div class="lampglow" id="glowR"></div><div class="lamppool" id="poolL"></div><div class="lamppool" id="poolR"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
