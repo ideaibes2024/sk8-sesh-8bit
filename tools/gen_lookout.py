@@ -89,9 +89,17 @@ def perched(c, ox, oy, ph):
 
 
 def sheet(fn, frames, path):
-    c = Canvas(BOX * frames, BOX, KEY)
-    for i in range(frames):
-        fn(c, i * BOX + ORIGIN[0], ORIGIN[1], i / float(frames) * 2 * math.pi)
+    """Emits frames+1 cells, the last a copy of the first.
+
+    With background-size:(N*100)% the browser spreads position 0%..100%
+    across (imageWidth - elementWidth) = (N-1) cells, so steps(N) lands
+    BETWEEN cells and two figures show at once. One extra cell makes the
+    travel exactly N cells, so every step is cell-aligned."""
+    n = frames + 1
+    c = Canvas(BOX * n, BOX, KEY)
+    for i in range(n):
+        fn(c, i * BOX + ORIGIN[0], ORIGIN[1],
+           (i % frames) / float(frames) * 2 * math.pi)
     return save(c, path)
 
 
