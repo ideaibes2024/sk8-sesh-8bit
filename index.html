@@ -301,23 +301,31 @@ body:has(.slot:not([hidden])){overflow:hidden}
 /* --- the night lookout: glides in after dark, perches on a tower --- */
 /* An original caped figure. Both pieces ride the same 180s clock as the
    sky, so the arrival lands at dusk and the perch holds until dawn. */
-.lookout{position:absolute;width:10.63%;height:18.89%;opacity:0;
-  background-repeat:no-repeat;image-rendering:pixelated}
-#lookoutGlide{background-image:url("lookout-glide.png");background-size:1300% 100%;
-  animation:lookFrames 0.6s steps(12) infinite, glideIn 180s linear infinite}
-#lookoutPerch{background-image:url("lookout-perch.png");background-size:1700% 100%;
-  left:77.19%;top:22.22%;
-  animation:perchFrames 4.8s steps(16) infinite, perchHold 180s linear infinite}
-@keyframes lookFrames{from{background-position-x:0%}to{background-position-x:100%}}
-@keyframes perchFrames{from{background-position-x:0%}to{background-position-x:100%}}
+.lookout{position:absolute;width:10.63%;height:18.89%;opacity:0;overflow:hidden}
+/* The frames live on an inner strip moved by transform, not by
+   background-position. Percentage background-size resolves against the
+   positioning area in a way that does not land on cell boundaries, which
+   showed two figures at once; translateX percentages are relative to the
+   strip's own width, so every step is exact at any screen size. */
+.lookout i{display:block;height:100%;background-repeat:no-repeat;
+  background-size:100% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#lookoutGlide i{width:1300%;background-image:url("lookout-glide.png");
+  animation:glideFrames 0.6s steps(12) infinite}
+#lookoutPerch i{width:1700%;background-image:url("lookout-perch.png");
+  animation:perchFrames 4.8s steps(16) infinite}
+@keyframes glideFrames{from{transform:translateX(0)}to{transform:translateX(-92.3077%)}}
+@keyframes perchFrames{from{transform:translateX(0)}to{transform:translateX(-94.1176%)}}
+
+#lookoutGlide{animation:glideIn 180s linear infinite}
+#lookoutPerch{left:77.19%;top:22.22%;animation:perchHold 180s linear infinite}
 @keyframes perchHold{
   0%,39%{opacity:0}  42%{opacity:1}  90%{opacity:1}  92%,100%{opacity:0}}
 
 /* Swoops in from whichever side the page picked: accelerates into a dive,
    bottoms out low over the park, then decelerates up onto the ledge. The
    per-keyframe easing is what gives it weight -- linear would float. */
-.fromL #lookoutGlide{animation-name:lookFrames,glideInL}
-.fromR #lookoutGlide{animation-name:lookFrames,glideInR}
+.fromL #lookoutGlide{animation-name:glideInL}
+.fromR #lookoutGlide{animation-name:glideInR}
 @keyframes glideInL{
   0%,26%{left:-16%;top:-6%;opacity:0}
   28%{left:-6%;top:2%;opacity:1;animation-timing-function:cubic-bezier(.3,0,.9,.35)}
@@ -336,10 +344,11 @@ body:has(.slot:not([hidden])){overflow:hidden}
   41%,100%{left:77.19%;top:22.22%;opacity:0}}
 
 .slot:has(.stage.bonus) #lookoutGlide{animation:none;opacity:0}
-.slot:has(.stage.bonus) #lookoutPerch{animation:perchFrames 4.8s steps(16) infinite;opacity:1}
+.slot:has(.stage.bonus) #lookoutPerch{animation:none;opacity:1}
 @media (prefers-reduced-motion: reduce){
   #lookoutGlide{animation:none;opacity:0}
-  #lookoutPerch{animation:none;opacity:1}}
+  #lookoutPerch{animation:none;opacity:1}
+  .lookout i{animation:none}}
 
 .slot:has(.stage.bonus) .lampbar,
 .slot:has(.stage.bonus) .citylights{animation:none;opacity:1}
@@ -643,7 +652,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"></div><div class="lookout" id="lookoutPerch"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3783,7 +3792,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
       // visibility animation has to be dropped from the list outright --
       // otherwise un-pausing the cloak restarts perchHold and hides him.
       if (g){ g.style.animation = 'none'; g.style.opacity = '0'; }
-      if (pch){ pch.style.animation = 'perchFrames 4.8s steps(16) infinite';
+      if (pch){ pch.style.animation = 'none';
                 pch.style.opacity = night ? '1' : '0'; }
       tag.textContent = night ? 'NIGHT (PAUSED)' : 'DAY (PAUSED)';
     }
