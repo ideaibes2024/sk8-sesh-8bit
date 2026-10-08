@@ -298,6 +298,28 @@ body:has(.slot:not([hidden])){overflow:hidden}
 #devcycle button:hover{background:#3d3a58}
 #devcycle b{font-family:var(--f-d);font-size:8px;color:#ffd21f;padding-left:4px}
 
+/* --- the Night Signal: his mark thrown on the sky after dark --- */
+/* A beam from a rooftop in the city up to a banded disc of light. Both
+   ride the same lampcycle clock as the lamps and the windows. */
+.signalbeam{position:absolute;left:36.88%;top:16.67%;width:36.88%;height:25.56%;
+  opacity:0;pointer-events:none;
+  background:linear-gradient(to top left,rgba(255,244,198,.34),
+    rgba(255,238,186,.10) 58%,rgba(255,238,186,0) 86%);
+  clip-path:polygon(97% 100%, 100% 93%, 11% 6%, 0% 44%);
+  animation:lampcycle 180s linear infinite}
+.signaldisc{position:absolute;left:30.00%;top:5.56%;width:27.5%;height:48.89%;
+  opacity:0;pointer-events:none;image-rendering:pixelated;
+  background:url("night-signal.png") center/contain no-repeat;
+  animation:lampcycle 180s linear infinite, signalflicker 7s steps(1) infinite}
+/* a slow, barely-there flicker so the projector feels real */
+@keyframes signalflicker{
+  0%,38%{filter:none}  40%{filter:brightness(.82)}  42%,71%{filter:none}
+  73%{filter:brightness(.9)}  75%,100%{filter:none}}
+.slot:has(.stage.bonus) .signalbeam,
+.slot:has(.stage.bonus) .signaldisc{animation:none;opacity:1}
+@media (prefers-reduced-motion: reduce){
+  .signalbeam,.signaldisc{animation:none}}
+
 /* --- the night lookout: glides in after dark, perches on a tower --- */
 /* An original caped figure. Both pieces ride the same 180s clock as the
    sky, so the arrival lands at dusk and the perch holds until dawn. */
@@ -658,7 +680,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="signalbeam"></div><div class="signaldisc"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3784,7 +3806,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
     var panel = document.getElementById('devcycle');
     if (!panel) return;
     var tag = panel.querySelector('b'), arrive = null;
-    var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights';
+    var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights,.signalbeam,.signaldisc';
     function hold(sec){
       document.querySelectorAll(CYCLED).forEach(function(e){
         e.style.animationDelay = (-sec)+'s';
