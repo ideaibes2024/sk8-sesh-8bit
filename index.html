@@ -287,6 +287,44 @@ body:has(.slot:not([hidden])){overflow:hidden}
          drop-shadow(0 0 16px rgba(255,200,110,.55));
   animation:lampcycle 180s linear infinite}
 
+/* --- the night lookout: glides in after dark, perches on a tower --- */
+/* An original caped figure. Both pieces ride the same 180s clock as the
+   sky, so the arrival lands at dusk and the perch holds until dawn. */
+.lookout{position:absolute;width:10.63%;height:18.89%;opacity:0;
+  background-repeat:no-repeat;image-rendering:pixelated;
+  filter:drop-shadow(0 0 4px rgba(120,100,200,.45))}
+#lookoutGlide{background-image:url("lookout-glide.png");background-size:800% 100%;
+  animation:lookFrames 0.8s steps(8) infinite, glideIn 180s linear infinite}
+#lookoutPerch{background-image:url("lookout-perch.png");background-size:2400% 100%;
+  left:77.19%;top:20.00%;
+  animation:perchFrames 3s steps(24) infinite, perchHold 180s linear infinite}
+@keyframes lookFrames{from{background-position-x:0%}to{background-position-x:100%}}
+@keyframes perchFrames{from{background-position-x:0%}to{background-position-x:100%}}
+@keyframes perchHold{
+  0%,39%{opacity:0}  42%{opacity:1}  90%{opacity:1}  92%,100%{opacity:0}}
+
+/* arrives from whichever side the page picked on load */
+.fromL #lookoutGlide{animation-name:lookFrames,glideInL}
+.fromR #lookoutGlide{animation-name:lookFrames,glideInR}
+@keyframes glideInL{
+  0%,27%{left:-16%;top:2%;opacity:0;transform:scaleX(-1)}
+  29%{opacity:1;transform:scaleX(-1)}
+  36%{left:52%;top:9%;transform:scaleX(-1)}
+  40%{left:77.19%;top:20.00%;opacity:1;transform:scaleX(-1)}
+  41%,100%{left:77.19%;top:20.00%;opacity:0;transform:scaleX(-1)}}
+@keyframes glideInR{
+  0%,27%{left:114%;top:2%;opacity:0}
+  29%{opacity:1}
+  36%{left:92%;top:9%}
+  40%{left:77.19%;top:20.00%;opacity:1}
+  41%,100%{left:77.19%;top:20.00%;opacity:0}}
+
+.slot:has(.stage.bonus) #lookoutGlide{animation:none;opacity:0}
+.slot:has(.stage.bonus) #lookoutPerch{animation:perchFrames 3s steps(24) infinite;opacity:1}
+@media (prefers-reduced-motion: reduce){
+  #lookoutGlide{animation:none;opacity:0}
+  #lookoutPerch{animation:none;opacity:1}}
+
 .slot:has(.stage.bonus) .lampbar,
 .slot:has(.stage.bonus) .citylights{animation:none;opacity:1}
 @media (prefers-reduced-motion: reduce){
@@ -589,7 +627,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"></div><div class="lookout" id="lookoutPerch"></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3709,6 +3747,9 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
     scn.children[0].style.display = 'none';                 // ground dashes
     if (trick === 'grind' && scn.children[1]) scn.children[1].style.display = 'none';  // its own rail
   }
+  /* the lookout comes in from a random side each page load */
+  scene.classList.add(Math.random() < 0.5 ? 'fromL' : 'fromR');
+
   ride('skRamp', 'deckout');
   ride('skRail', 'stairclimb');
   ride('skIdle', 'idle');
