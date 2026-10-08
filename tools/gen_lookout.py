@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-SK8 SESH -- "the night lookout": an original caped figure that glides in
-after dark and perches on a rooftop with its cloak moving in the wind.
+SK8 SESH -- "the night lookout": an original caped figure.
 
-  lookout-glide.png   8 frames, cloak fanned out, drifting in
-  lookout-perch.png   24 frames, crouched on the ledge, cloak rippling
+  lookout-glide.png   12 frames, a pure black bat silhouette, wings beating
+  lookout-perch.png   24 frames, front-facing on the ledge, cloak in the wind
 
-Original design: a hooded courier silhouette with a plain trailing cloak.
+Original design. In the air it reads only as a bat shape; perched it is a
+small hooded figure facing the viewer with a cloak spreading to both sides.
 
     python3 tools/gen_lookout.py [--contact]
 """
@@ -17,13 +17,15 @@ from gen_scene import Canvas, hx, KEY
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCALE = 5
 BOX = 34
-ORIGIN = (17, 30)          # feet / perch contact inside the cell
+ORIGIN = (17, 26)          # perch contact inside the cell
+K = 0.62                   # overall figure scale -- smaller than before
 
-CLOAK = hx('#241c3a')
-CLOAK_HI = hx('#3b2f5c')
-BODY = hx('#17121f')
-TRIM = hx('#6b5fa8')
-SKIN = hx('#d9b48a')
+BLACK = hx('#07060c')
+CLOAK = hx('#17132a')
+CLOAK_HI = hx('#2b2448')
+BODY = hx('#0d0a16')
+TRIM = hx('#5b4f94')
+SKIN = hx('#caa882')
 
 
 def save(c, path):
@@ -35,71 +37,69 @@ def save(c, path):
     return os.path.getsize(path)
 
 
+def bat(c, ox, oy, ph):
+    """Flying form: a flat black bat silhouette, nothing but shape."""
+    flap = math.sin(ph)
+    span = 13 * K * 1.9
+    for s in (-1, 1):
+        for i in range(1, int(span) + 1):
+            t = i / span
+            # wing sweeps up and down; the membrane scallops along the edge
+            top = -1.5 * K - math.sin(t * math.pi) * 3.2 * K + flap * 7.5 * K * t
+            thick = (1 - t) * 4.6 * K + 1.2 + math.sin(t * 9) * .5
+            c.rect(ox + s * i, oy + top, 1, max(1, thick), BLACK)
+        # wing tip finger
+        tt = flap * 7.5 * K + -1.5 * K
+        c.rect(ox + s * int(span), oy + tt - 1, 1, 3, BLACK)
+    # body and ears
+    c.fcircle(ox, oy, 2.6 * K + 1.1, BLACK)
+    c.rect(ox - 2, oy - 3.4 * K - 1.6, 1, 2, BLACK)
+    c.rect(ox + 1, oy - 3.4 * K - 1.6, 1, 2, BLACK)
+
+
 def perched(c, ox, oy, ph):
-    """Crouched on a ledge facing left, cloak trailing right and rippling."""
-    # cloak first, behind everything
-    for y in range(-13, 4):
-        t = (y + 13) / 17.0
-        reach = 2.5 + t * 11 + math.sin(y * 0.55 + ph) * 2.6 * (0.35 + t)
-        c.rect(ox + 1, oy + y, max(1, reach), 1, CLOAK)
-        if y % 3 == 0:
-            c.rect(ox + 1 + reach * .55, oy + y, 2, 1, CLOAK_HI)
-    # trailing hem flicks
-    hem = 2 + math.sin(ph * 1.3) * 1.5
-    c.rect(ox + 12, oy + 2, max(1, hem + 3), 1, CLOAK)
-
-    # legs tucked under, body crouched
-    c.rect(ox - 3, oy - 3, 5, 3, BODY)
-    c.rect(ox - 4, oy, 7, 1, BODY)
-    c.rect(ox - 4, oy - 11, 6, 9, BODY)
-    # shoulders / hood
-    c.fcircle(ox - 1, oy - 13, 3.4, CLOAK)
-    c.fcircle(ox - 2, oy - 13, 2.4, BODY)
-    c.rect(ox - 4, oy - 14, 2, 2, SKIN)        # a sliver of face
-    c.rect(ox - 2, oy - 9, 4, 1, TRIM)         # belt
-    # forearm resting on the knee
-    c.rect(ox - 4, oy - 6, 3, 1, BODY)
-
-
-def gliding(c, ox, oy, ph):
-    """Cloak fanned wide, body angled forward, drifting."""
-    span = 13 + math.sin(ph) * 2.5
-    for y in range(-9, 6):
-        t = (y + 9) / 15.0
-        w = span * (1 - abs(t - 0.45) * 1.5)
-        if w < 1:
-            continue
-        c.rect(ox - w, oy + y - 2, w * 2, 1, CLOAK)
-        if y % 4 == 0:
-            c.rect(ox - w * .6, oy + y - 2, w * 1.2, 1, CLOAK_HI)
-    c.rect(ox - 2, oy - 10, 5, 11, BODY)
-    c.fcircle(ox, oy - 11, 3.2, CLOAK)
-    c.fcircle(ox - 1, oy - 11, 2.2, BODY)
-    c.rect(ox - 3, oy - 12, 2, 2, SKIN)
-    c.rect(ox - 2, oy - 6, 4, 1, TRIM)
-    c.rect(ox - 4, oy + 1, 3, 2, BODY)         # trailing legs
-    c.rect(ox + 1, oy + 1, 3, 2, BODY)
+    """Perched facing the viewer, cloak spilling to both sides in the wind."""
+    # cloak behind, drawn outward from the shoulders on each side
+    for s in (-1, 1):
+        for y in range(int(-13 * K), int(5 * K) + 1):
+            t = (y - (-13 * K)) / (18 * K)
+            gust = math.sin(ph + s * 0.7) * 0.5 + 0.5
+            reach = (2.2 + t * 7.5 * (0.7 + gust * 0.7)) * K * 1.5
+            reach += math.sin(y * 0.8 + ph * 1.4 + s) * 1.5 * K * t * 3
+            if reach < 1:
+                continue
+            c.rect(ox + (1 if s > 0 else -reach), oy + y, max(1, reach), 1, CLOAK)
+            if y % 4 == 0:
+                c.rect(ox + s * reach * .6, oy + y, 1, 1, CLOAK_HI)
+    # hunched body, knees up, feet gripping the ledge
+    c.rect(ox - 3, oy - 9 * K - 2, 6, 9 * K + 2, BODY)
+    c.rect(ox - 4, oy - 1, 3, 2, BODY)
+    c.rect(ox + 2, oy - 1, 3, 2, BODY)
+    # hood and a sliver of face, looking straight out
+    c.fcircle(ox, oy - 11 * K - 2.5, 3.0 * K + 1.4, CLOAK)
+    c.fcircle(ox, oy - 11 * K - 2.2, 2.1 * K + 1.0, BODY)
+    c.rect(ox - 1, oy - 11 * K - 2.6, 2, 2, SKIN)
+    c.rect(ox - 2, oy - 5 * K - 1, 5, 1, TRIM)
 
 
 def sheet(fn, frames, path):
     c = Canvas(BOX * frames, BOX, KEY)
     for i in range(frames):
         fn(c, i * BOX + ORIGIN[0], ORIGIN[1], i / float(frames) * 2 * math.pi)
-    return save(c, path), c
+    return save(c, path)
 
 
 if __name__ == '__main__':
-    for name, fn, n in (('lookout-glide', gliding, 8), ('lookout-perch', perched, 24)):
+    for name, fn, n in (('lookout-glide', bat, 12), ('lookout-perch', perched, 24)):
         p = os.path.join(ROOT, name + '.png')
-        size, c = sheet(fn, n, p)
-        print('%-18s %d frames  %d KB' % (name + '.png', n, size // 1024))
+        print('%-18s %d frames  %d KB' % (name + '.png', n, sheet(fn, n, p) // 1024))
         if '--contact' in sys.argv:
             from PIL import Image
             im = Image.open(p)
-            w = BOX * SCALE * min(n, 8)
+            w = BOX * SCALE * min(n, 12)
             rows = [im.crop((r * w, 0, (r + 1) * w, BOX * SCALE))
-                    for r in range(max(1, n // 8))]
-            out = Image.new('RGB', (w, BOX * SCALE * len(rows)), (40, 44, 58))
+                    for r in range(max(1, n // 12))]
+            out = Image.new('RGB', (w, BOX * SCALE * len(rows)), (36, 34, 52))
             for i, r in enumerate(rows):
                 out.paste(r, (0, i * BOX * SCALE), r)
             out.save(os.path.join(ROOT, 'tools', name + '-contact.png'))
