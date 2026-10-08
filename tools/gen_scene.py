@@ -571,39 +571,98 @@ def build(night=False, sky=True):
     ink = OUT
 
     # ---------------- quarter pipe (left) --------------------------------
+    # The transition curve, the deck height and the coping position are the
+    # skating surface the rider's path is tuned to -- the detailing below
+    # sits behind or beside it and never crosses it.
     qp_x0, qp_x1 = -4, 70          # transition footprint
     qp_base, qp_top = 150, 112
-    for x in range(qp_x0, qp_x1 + 1):
+
+    def face_y(x):
         t = (x - qp_x0) / float(qp_x1 - qp_x0)
-        y = qp_base - (qp_base - qp_top) * (t ** 2.1)
-        if x < 0:
-            continue
-        c.vline(x, int(y), qp_base, hx('#e9b86b'))
-        c.vline(x, int(y), int(y) + 1, ink)
-        # plywood seams
-        if x % 11 == 0:
-            c.vline(x, int(y) + 2, qp_base, hx('#c98f3e'), .7)
-    c.rect(0, qp_base, qp_x1 + 1, 4, hx('#b37c34'))
+        return qp_base - (qp_base - qp_top) * (t ** 2.1)
+
+    # cast shadow pooling on the flat in front of the ramp
+    c.rect(0, qp_base + 4, qp_x1 + 30, 3, hx('#9d968b'), .55)
+    c.rect(0, qp_base + 7, qp_x1 + 24, 2, hx('#aba49a'), .35)
+
+    # --- riding surface: horizontal plywood panels, lighter toward the lip
+    PLY = ('#b9833c', '#c8924a', '#d9a257', '#e9b86b', '#f3c87e')
+    for x in range(max(0, qp_x0), qp_x1 + 1):
+        y = int(face_y(x))
+        for yy in range(y, qp_base):
+            band = ((yy - qp_top) // 7) % len(PLY)
+            c.set(x, yy, hx(PLY[band]))
+        # panel seam lines run across the face
+        for sy in range(qp_top, qp_base, 7):
+            if sy > y:
+                c.set(x, sy, hx('#8d6029'), .55)
+        c.vline(x, y, y + 1, ink)                    # crisp surface edge
+        c.set(x, y + 2, hx('#ffe3ab'), .5)           # worn sheen below it
+
+    # vertical ply joints, stopping short of the surface so it stays clean
+    for jx in range(6, qp_x1, 13):
+        jy = int(face_y(jx)) + 3
+        c.vline(jx, jy, qp_base - 1, hx('#8d6029'), .6)
+        for by in range(jy + 3, qp_base - 2, 9):     # bolt heads down the joint
+            c.rect(jx - 1, by, 2, 2, ink)
+            c.set(jx - 1, by, hx('#cfd6dd'))
+
+    # scratches and chipped paint along the riding line
+    for sx, sl in ((14, 9), (30, 13), (46, 8), (56, 11)):
+        sy = int(face_y(sx)) + 4
+        c.rect(sx, sy, sl, 1, hx('#8d6029'), .45)
+    for cx_ in range(2, qp_x1, 9):
+        cy_ = int(face_y(cx_)) + 2
+        c.set(cx_, cy_, hx('#a8762f'), .7)
+
+    # --- skirt and footing under the ramp
+    c.rect(0, qp_base, qp_x1 + 1, 5, hx('#8a5f28'))
     c.rect(0, qp_base, qp_x1 + 1, 1, ink)
-    # deck
-    c.rect(qp_x1 - 1, qp_top, 32, 4, hx('#c98f3e'))
+    c.rect(0, qp_base + 4, qp_x1 + 1, 1, ink)
+    for sx in range(4, qp_x1, 12):                   # darker supports beneath
+        c.rect(sx, qp_base + 1, 3, 3, hx('#6b4820'))
+
+    # --- deck: top surface, fascia, legs
+    c.rect(qp_x1 - 1, qp_top, 32, 4, hx('#d9a257'))
     c.rect(qp_x1 - 1, qp_top, 32, 1, ink)
+    c.rect(qp_x1 - 1, qp_top + 3, 32, 1, hx('#8d6029'))
     c.rect(qp_x1 - 1, qp_top + 4, 32, 22, hx('#9c6c2b'))
-    for x in range(qp_x1, qp_x1 + 31, 6):
-        c.vline(x, qp_top + 4, qp_top + 25, hx('#7d5522'), .6)
+    for x in range(qp_x1 + 2, qp_x1 + 31, 7):        # fascia planks
+        c.vline(x, qp_top + 5, qp_top + 24, hx('#7d5522'), .7)
+        c.vline(x + 1, qp_top + 5, qp_top + 24, hx('#b07e34'), .25)
+    for ly in (qp_top + 9, qp_top + 18):             # steel brackets
+        c.rect(qp_x1 + 1, ly, 29, 2, hx('#6e767f'))
+        c.rect(qp_x1 + 1, ly, 29, 1, hx('#99a2ab'))
+        for bx in (qp_x1 + 3, qp_x1 + 14, qp_x1 + 27):
+            c.rect(bx, ly, 2, 2, ink)
+            c.set(bx, ly, hx('#cfd6dd'))
     c.rect(qp_x1 - 1, qp_top + 25, 32, 2, ink)
-    # coping
+    c.rect(qp_x1 + 2, qp_top + 27, 4, 4, hx('#5d3f1c'))   # legs
+    c.rect(qp_x1 + 24, qp_top + 27, 4, 4, hx('#5d3f1c'))
+
+    # --- steel coping along the lip
     c.rect(qp_x1 - 3, qp_top - 1, 6, 3, ink)
     c.rect(qp_x1 - 2, qp_top - 1, 4, 2, hx('#b9c2cb'))
-    c.rect(qp_x1 - 2, qp_top - 1, 4, 1, hx('#e2e8ee'))
-    # deck guard rail
+    c.rect(qp_x1 - 2, qp_top - 1, 4, 1, hx('#e8eef4'))
+    c.set(qp_x1 - 2, qp_top, hx('#7b848d'))
+
+    # --- deck guard rail
     for rx in (qp_x1 + 6, qp_x1 + 26):
         c.rect(rx, qp_top - 9, 2, 9, ink)
+        c.rect(rx, qp_top - 9, 1, 9, hx('#6e767f'))
     c.rect(qp_x1 + 6, qp_top - 10, 22, 2, ink)
     c.rect(qp_x1 + 6, qp_top - 10, 22, 1, hx('#ffd21f'))
-    # sticker slap on the ramp face
-    c.fellipse(26, 134, 6, 4, hx('#ff2fb0'))
-    c.fellipse(26, 133, 5, 3, hx('#ffffff'))
+
+    # --- stickers slapped on the fascia, clear of the riding surface
+    c.fellipse(30, 147, 5, 3, hx('#ff2fb0'))         # old slap, flat on the face
+    c.fellipse(30, 146, 4, 2, hx('#ffffff'))
+    c.rect(qp_x1 + 4, qp_top + 6, 7, 5, ink)         # square sticker
+    c.rect(qp_x1 + 5, qp_top + 7, 5, 3, hx('#19c7c7'))
+    c.rect(qp_x1 + 6, qp_top + 8, 3, 1, hx('#ffffff'))
+    c.fellipse(qp_x1 + 19, qp_top + 8, 5, 3, ink)    # oval sticker
+    c.fellipse(qp_x1 + 19, qp_top + 8, 4, 2, hx('#ffd21f'))
+    c.rect(qp_x1 + 11, qp_top + 20, 6, 4, ink)       # little tag
+    c.rect(qp_x1 + 12, qp_top + 21, 4, 2, hx('#3ddc84'))
 
     # ---------------- funbox + ledge (centre back) ------------------------
     fb_x, fb_y, fb_w = 138, 122, 64
