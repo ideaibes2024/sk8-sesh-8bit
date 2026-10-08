@@ -398,20 +398,28 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .sklayer{position:absolute;pointer-events:none;overflow:hidden}
 .sk{position:absolute;width:14.375%;height:25.556%}
 
-/* blue path -- up the ramp, lands on the deck platform, picks his board
-   back up, then drops in. 7s matches the 'deckout' trick's own 7000ms. */
-#skRamp{animation:pathRamp 7s linear infinite}
+/* The rider: the reference skater, redrawn at sprite scale. In from
+   off-screen left, up the transition, small air, lands on the deck, rolls
+   forward, 180s, rides back and down, exits left. Frames and path are both
+   7s so the trick always lands in the right place. */
+#skRamp{position:absolute;width:10.63%;height:18.89%;overflow:hidden;
+  animation:pathRamp 7s linear infinite}
+#skRamp i{display:block;height:100%;width:4900%;image-rendering:pixelated;
+  background:url("rider.png") 0 0/100% 100%;background-repeat:no-repeat;
+  animation:riderFrames 7s steps(48) infinite}
+@keyframes riderFrames{from{transform:translateX(0)}to{transform:translateX(-97.9592%)}}
 @keyframes pathRamp{
-  0%{left:-12.81%;top:67.61%;transform:scaleX(1)}
-  8%{left:-4.69%;top:63.72%}   14%{left:3.44%;top:58.72%}
-  20%{left:9.69%;top:51.50%}   24%{left:12.81%;top:45.94%}
-  31%{left:15.31%;top:39.28%}  37%{left:17.19%;top:34.83%}
-  43%{left:19.06%;top:42.61%}  49%{left:19.69%;top:42.61%;transform:scaleX(1)}
-  56%{left:20.31%;top:42.61%;transform:scaleX(-1)}
-  70%{left:20.31%;top:42.61%}  78%{left:19.06%;top:42.61%}
-  84%{left:17.19%;top:42.61%}  90%{left:15.94%;top:42.61%}
-  94%{left:12.81%;top:46.50%}  97%{left:0.31%;top:61.50%}
-  100%{left:-12.81%;top:67.61%;transform:scaleX(-1)}}
+  0%{left:-14.69%;top:67.78%}    12%{left:-3.44%;top:67.78%}
+  24%{left:2.19%;top:67.78%}     34%{left:7.19%;top:62.22%}
+  42%{left:12.19%;top:55.56%}    47%{left:15.31%;top:50.00%}
+  50%{left:17.50%;top:44.44%}    53%{left:19.38%;top:46.67%}
+  56%{left:20.94%;top:46.67%}    60%{left:22.81%;top:46.67%}
+  66%{left:25.00%;top:46.67%}    70%{left:25.63%;top:46.67%}
+  76%{left:25.63%;top:46.67%}    79%{left:25.00%;top:46.67%}
+  85%{left:22.19%;top:46.67%}    89%{left:17.19%;top:47.78%}
+  94%{left:11.56%;top:56.11%}    97%{left:5.31%;top:62.78%}
+  100%{left:-14.69%;top:67.78%}}
+@media (prefers-reduced-motion: reduce){#skRamp,#skRamp i{animation:none}}
 
 /* green path -- down the handrail, roll out, then back up the stairs one
    tread at a time. Paired keyframes at each tread (flat, then rise) make
@@ -680,7 +688,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="signalbeam"></div><div class="signaldisc"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div class="sk" id="skRamp"></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="signalbeam"></div><div class="signaldisc"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div id="skRamp"><i></i></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
     <header class="slotbar">
       <span class="barspacer" aria-hidden="true"></span>
       <div class="brand">SK8 SESH</div>
@@ -3865,7 +3873,6 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
   /* the lookout comes in from a random side each page load */
   scene.classList.add(Math.random() < 0.5 ? 'fromL' : 'fromR');
 
-  ride('skRamp', 'deckout');
   ride('skRail', 'stairclimb');
   ride('skIdle', 'idle');
 })();
