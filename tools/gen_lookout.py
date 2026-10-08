@@ -58,24 +58,30 @@ def bat(c, ox, oy, ph):
 
 
 def perched(c, ox, oy, ph):
-    """Perched facing the viewer, cloak spilling to both sides in the wind."""
-    # cloak behind, drawn outward from the shoulders on each side
-    for s in (-1, 1):
-        for y in range(int(-13 * K), int(5 * K) + 1):
-            t = (y - (-13 * K)) / (18 * K)
-            gust = math.sin(ph + s * 0.7) * 0.5 + 0.5
-            reach = (2.2 + t * 7.5 * (0.7 + gust * 0.7)) * K * 1.5
-            reach += math.sin(y * 0.8 + ph * 1.4 + s) * 1.5 * K * t * 3
-            if reach < 1:
-                continue
-            c.rect(ox + (1 if s > 0 else -reach), oy + y, max(1, reach), 1, CLOAK)
-            if y % 4 == 0:
-                c.rect(ox + s * reach * .6, oy + y, 1, 1, CLOAK_HI)
-    # hunched body, knees up, feet gripping the ledge
+    """Perched facing the viewer. The silhouette is FIXED -- only the hem of
+    the cloak moves. Animating the whole outline makes it pulse like a
+    loading spinner instead of sitting still in a breeze."""
+    # fixed cloak: a steady trapezoid falling from the shoulders
+    for y in range(int(-12 * K), int(5 * K) + 1):
+        t = (y - (-12 * K)) / (17 * K)
+        reach = (2.4 + t * 7.0) * K * 1.55
+        c.rect(ox - reach, oy + y, reach * 2, 1, CLOAK)
+
+    # only the bottom couple of rows flutter, and only by a pixel
+    hemy = int(5 * K)
+    for s_ in (-1, 1):
+        base = (2.4 + 7.0) * K * 1.55
+        for i, yy in enumerate((hemy, hemy + 1)):
+            lift = math.sin(ph + s_ * 1.1 + i * 0.9)
+            w = base + (1 if lift > 0.35 else 0)
+            if lift < -0.55:
+                continue                      # a corner of the hem lifts away
+            c.rect(ox + (0 if s_ > 0 else -w), oy + yy, w, 1, CLOAK)
+
+    # body, knees up, feet on the ledge -- all static
     c.rect(ox - 3, oy - 9 * K - 2, 6, 9 * K + 2, BODY)
     c.rect(ox - 4, oy - 1, 3, 2, BODY)
     c.rect(ox + 2, oy - 1, 3, 2, BODY)
-    # hood and a sliver of face, looking straight out
     c.fcircle(ox, oy - 11 * K - 2.5, 3.0 * K + 1.4, CLOAK)
     c.fcircle(ox, oy - 11 * K - 2.2, 2.1 * K + 1.0, BODY)
     c.rect(ox - 1, oy - 11 * K - 2.6, 2, 2, SKIN)
@@ -90,7 +96,7 @@ def sheet(fn, frames, path):
 
 
 if __name__ == '__main__':
-    for name, fn, n in (('lookout-glide', bat, 12), ('lookout-perch', perched, 24)):
+    for name, fn, n in (('lookout-glide', bat, 12), ('lookout-perch', perched, 16)):
         p = os.path.join(ROOT, name + '.png')
         print('%-18s %d frames  %d KB' % (name + '.png', n, sheet(fn, n, p) // 1024))
         if '--contact' in sys.argv:

@@ -302,13 +302,12 @@ body:has(.slot:not([hidden])){overflow:hidden}
 /* An original caped figure. Both pieces ride the same 180s clock as the
    sky, so the arrival lands at dusk and the perch holds until dawn. */
 .lookout{position:absolute;width:10.63%;height:18.89%;opacity:0;
-  background-repeat:no-repeat;image-rendering:pixelated;
-  filter:drop-shadow(0 0 4px rgba(120,100,200,.45))}
+  background-repeat:no-repeat;image-rendering:pixelated}
 #lookoutGlide{background-image:url("lookout-glide.png");background-size:1200% 100%;
   animation:lookFrames 0.6s steps(12) infinite, glideIn 180s linear infinite}
-#lookoutPerch{background-image:url("lookout-perch.png");background-size:2400% 100%;
+#lookoutPerch{background-image:url("lookout-perch.png");background-size:1600% 100%;
   left:77.19%;top:22.22%;
-  animation:perchFrames 3s steps(24) infinite, perchHold 180s linear infinite}
+  animation:perchFrames 4.8s steps(16) infinite, perchHold 180s linear infinite}
 @keyframes lookFrames{from{background-position-x:0%}to{background-position-x:100%}}
 @keyframes perchFrames{from{background-position-x:0%}to{background-position-x:100%}}
 @keyframes perchHold{
@@ -337,7 +336,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
   41%,100%{left:77.19%;top:22.22%;opacity:0}}
 
 .slot:has(.stage.bonus) #lookoutGlide{animation:none;opacity:0}
-.slot:has(.stage.bonus) #lookoutPerch{animation:perchFrames 3s steps(24) infinite;opacity:1}
+.slot:has(.stage.bonus) #lookoutPerch{animation:perchFrames 4.8s steps(16) infinite;opacity:1}
 @media (prefers-reduced-motion: reduce){
   #lookoutGlide{animation:none;opacity:0}
   #lookoutPerch{animation:none;opacity:1}}
@@ -3784,7 +3783,7 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
       // visibility animation has to be dropped from the list outright --
       // otherwise un-pausing the cloak restarts perchHold and hides him.
       if (g){ g.style.animation = 'none'; g.style.opacity = '0'; }
-      if (pch){ pch.style.animation = 'perchFrames 3s steps(24) infinite';
+      if (pch){ pch.style.animation = 'perchFrames 4.8s steps(16) infinite';
                 pch.style.opacity = night ? '1' : '0'; }
       tag.textContent = night ? 'NIGHT (PAUSED)' : 'DAY (PAUSED)';
     }
