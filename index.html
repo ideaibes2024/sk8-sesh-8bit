@@ -287,6 +287,17 @@ body:has(.slot:not([hidden])){overflow:hidden}
          drop-shadow(0 0 16px rgba(255,200,110,.55));
   animation:lampcycle 180s linear infinite}
 
+/* ===== TEMPORARY dev control: force day/night, pause and resume =====
+   Delete this rule, the #devcycle markup and its script to remove. */
+#devcycle{position:fixed;left:10px;bottom:76px;z-index:120;display:flex;gap:6px;
+  align-items:center;background:rgba(10,8,18,.9);border:2px solid #141414;
+  border-radius:10px;padding:6px 8px}
+#devcycle button{font-family:var(--f-d);font-size:9px;letter-spacing:.04em;
+  padding:7px 9px;border-radius:7px;border:2px solid #141414;cursor:pointer;
+  background:#2b2840;color:#fff}
+#devcycle button:hover{background:#3d3a58}
+#devcycle b{font-family:var(--f-d);font-size:8px;color:#ffd21f;padding-left:4px}
+
 /* --- the night lookout: glides in after dark, perches on a tower --- */
 /* An original caped figure. Both pieces ride the same 180s clock as the
    sky, so the arrival lands at dusk and the perch holds until dawn. */
@@ -3713,6 +3724,7 @@ else { $('msg').textContent = 'Connecting to the casino...'; $('spinbtn').disabl
 
 try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
 </script>
+<div id="devcycle"><button data-phase="0">DAY</button><button data-phase="108">NIGHT</button><button data-phase="resume">RESUME</button><b>RUNNING</b></div>
 <script>
 /* Size the skater layer exactly like the park backdrop's `cover` sizing
    (16:9, centred horizontally, anchored to the bottom) so the sprites stay
@@ -3747,6 +3759,43 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
     scn.children[0].style.display = 'none';                 // ground dashes
     if (trick === 'grind' && scn.children[1]) scn.children[1].style.display = 'none';  // its own rail
   }
+  /* ===== TEMPORARY dev control ===== */
+  (function(){
+    var panel = document.getElementById('devcycle');
+    if (!panel) return;
+    var tag = panel.querySelector('b');
+    var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights';
+    function hold(sec){
+      document.querySelectorAll(CYCLED).forEach(function(e){
+        e.style.animationDelay = (-sec)+'s';
+        e.style.animationPlayState = 'paused';
+      });
+      // the lookout is shown or hidden outright, so its cloak keeps moving
+      var night = sec > 70 && sec < 160;
+      var g = document.getElementById('lookoutGlide'),
+          pch = document.getElementById('lookoutPerch');
+      if (g) g.style.opacity = '0';
+      if (pch){ pch.style.opacity = night ? '1' : '0';
+                pch.style.animationPlayState = 'running'; }
+      tag.textContent = night ? 'NIGHT (PAUSED)' : 'DAY (PAUSED)';
+    }
+    function resume(){
+      document.querySelectorAll(CYCLED).forEach(function(e){
+        e.style.animationDelay = ''; e.style.animationPlayState = '';
+      });
+      ['lookoutGlide','lookoutPerch'].forEach(function(id){
+        var e = document.getElementById(id);
+        if (e){ e.style.opacity = ''; e.style.animationPlayState = ''; }
+      });
+      tag.textContent = 'RUNNING';
+    }
+    panel.addEventListener('click', function(ev){
+      var b = ev.target.closest('button');
+      if (!b) return;
+      if (b.dataset.phase === 'resume') resume(); else hold(+b.dataset.phase);
+    });
+  })();
+
   /* the lookout comes in from a random side each page load */
   scene.classList.add(Math.random() < 0.5 ? 'fromL' : 'fromR');
 
