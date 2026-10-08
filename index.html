@@ -301,7 +301,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
 /* --- the night lookout: glides in after dark, perches on a tower --- */
 /* An original caped figure. Both pieces ride the same 180s clock as the
    sky, so the arrival lands at dusk and the perch holds until dawn. */
-.lookout{position:absolute;width:10.63%;height:18.89%;opacity:0;overflow:hidden}
+.lookout{position:absolute;width:7.5%;height:13.33%;opacity:0;overflow:hidden}
 /* The frames live on an inner strip moved by transform, not by
    background-position. Percentage background-size resolves against the
    positioning area in a way that does not land on cell boundaries, which
@@ -317,7 +317,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
 @keyframes perchFrames{from{transform:translateX(0)}to{transform:translateX(-94.1176%)}}
 
 #lookoutGlide{animation:glideIn 180s linear infinite}
-#lookoutPerch{left:77.19%;top:22.22%;animation:perchHold 180s linear infinite}
+#lookoutPerch{left:78.75%;top:26.47%;animation:perchHold 180s linear infinite}
 @keyframes perchHold{
   0%,39%{opacity:0}  42%{opacity:1}  90%{opacity:1}  92%,100%{opacity:0}}
 
@@ -331,23 +331,23 @@ body:has(.slot:not([hidden])){overflow:hidden}
   0%{left:-20%;top:-6%;animation-timing-function:cubic-bezier(.32,0,.85,.4)}
   50%{left:28%;top:32%}
   74%{left:55%;top:34%;animation-timing-function:cubic-bezier(.1,.75,.3,1)}
-  100%{left:77.19%;top:22.22%}}
+  100%{left:78.75%;top:26.47%}}
 @keyframes glideInL{
   0%,26%{left:-16%;top:-6%;opacity:0}
   28%{left:-6%;top:2%;opacity:1;animation-timing-function:cubic-bezier(.3,0,.9,.35)}
   33%{left:30%;top:24%}
   36%{left:50%;top:33%;animation-timing-function:cubic-bezier(.1,.8,.3,1)}
   38.5%{left:64%;top:28%}
-  40%{left:77.19%;top:22.22%;opacity:1}
-  41%,100%{left:77.19%;top:22.22%;opacity:0}}
+  40%{left:78.75%;top:26.47%;opacity:1}
+  41%,100%{left:78.75%;top:26.47%;opacity:0}}
 @keyframes glideInR{
   0%,26%{left:114%;top:-6%;opacity:0}
   28%{left:104%;top:2%;opacity:1;animation-timing-function:cubic-bezier(.3,0,.9,.35)}
   33%{left:62%;top:24%}
   36%{left:40%;top:33%;animation-timing-function:cubic-bezier(.1,.8,.3,1)}
   38.5%{left:60%;top:28%}
-  40%{left:77.19%;top:22.22%;opacity:1}
-  41%,100%{left:77.19%;top:22.22%;opacity:0}}
+  40%{left:78.75%;top:26.47%;opacity:1}
+  41%,100%{left:78.75%;top:26.47%;opacity:0}}
 
 .slot:has(.stage.bonus) #lookoutGlide{animation:none;opacity:0}
 .slot:has(.stage.bonus) #lookoutPerch{animation:none;opacity:1}
