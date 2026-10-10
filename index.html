@@ -77,7 +77,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .gridbox{--gap:10px}
 @media (max-width:600px){.gridbox{--gap:6px}}
 .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--gap);height:100%}
-.reel{position:relative;display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:var(--gap);min-height:0;overflow:hidden;padding:0}
+.reel{position:relative;display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:var(--gap);min-height:0;overflow:visible;padding:0}
+.reel.rolling{overflow:hidden}   /* clip the spinning strip, but not the win glow once it lands */
 .grid .c{position:relative;z-index:2;background:transparent;border-radius:16%;line-height:0;min-height:0}
 .grid .c svg,.strip .sc svg{width:100%;height:100%;display:block}
 .grid .c.hit{box-shadow:0 0 0 3px #000,0 0 0 6px #FFE600,0 0 14px 6px rgba(255,230,0,.55)}
@@ -497,6 +498,21 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .sidebuy[hidden]{display:none}
 @media (max-width:1100px){.stagewrap{display:flex;flex-direction:column;align-items:flex-start}.sidebuy{position:static;transform:none;width:auto;padding:8px 18px;border-radius:18px;font-size:9px;line-height:1.3;margin:0 0 6px;box-shadow:0 4px 0 #141414}.sidebuy br{display:none}}
 .spin:active{transform:translateY(4px);box-shadow:0 3px 0 #141414}
+/* ---- pointer feedback -------------------------------------------------
+   The bet steppers, the menu button, the pills and the buy button gave no
+   response at all to hover or press; only SPIN and the side buy did. These
+   match SPIN's language: a small lift on hover, sink onto the shadow on press. */
+.pill:hover:not(:disabled),.iconbtn:hover,.menutabs button:hover,.btn:hover:not(:disabled){filter:brightness(1.18)}
+.round:hover:not(:disabled){filter:brightness(1.25);border-color:#3a3550}
+.round:active:not(:disabled){transform:translateY(2px);filter:brightness(.92)}
+.pill:active:not(:disabled),.menutabs button:active{transform:translateY(2px);filter:brightness(.94)}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #141414}
+.buy:hover:not(:disabled){filter:brightness(1.07)}
+.buy:active:not(:disabled){transform:translateY(3px)}
+.buy:disabled{opacity:.5;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){
+  .round:active:not(:disabled),.pill:active:not(:disabled),.menutabs button:active,.iconbtn:active,.buy:active:not(:disabled){transform:none}
+}
 .spin:disabled{filter:saturate(.3);opacity:.7;cursor:not-allowed}
 @media (max-width:700px){
   .ctrlbar{gap:6px 10px}
@@ -534,7 +550,7 @@ body:has(.slot:not([hidden])){overflow:hidden}
   .spin{width:100%;height:64px;font-size:16px;border-radius:18px;box-shadow:0 5px 0 #141414}
   .machine .msg{grid-area:msg;font-size:11px;max-width:220px}
   .machine .odds{display:none}
-  .ctrlbar{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:8px;padding:4px 10px calc(4px + env(safe-area-inset-bottom))}
+  .ctrlbar{display:flex;flex-wrap:nowrap;min-width:0;justify-content:space-between;align-items:center;gap:8px;padding:4px 10px calc(4px + env(safe-area-inset-bottom))}
   .ctrlbar .iconbtn{width:42px;height:36px;gap:4px;padding:0 9px;margin:0;box-shadow:0 3px 0 #141414}
   .ctrlbar .iconbtn span{height:4px}
   .ctl .k{font-size:7px}.ctl b{font-size:18px}
@@ -617,7 +633,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
   .ctrlbar{gap:4px 8px;padding:5px 8px}.ctl b{font-size:16px}.ctl .k{font-size:6px}
   .spin{height:36px;font-size:11px;border-radius:12px;box-shadow:0 3px 0 #141414}
   .sidebuy{padding:4px 10px;font-size:7px;box-shadow:0 3px 0 #141414}
-  .tools{display:none}
+  .tools{display:none}   /* too narrow for the bar: relocated into the menu drawer by JS */
 }
 </style>
 <style>
@@ -625,7 +641,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 #lineov polyline.ww-off{opacity:.12}
 .grid.ww-focus .c.hit:not(.ww-on){box-shadow:none}
 .grid.ww-focus .c:not(.ww-on) > svg{opacity:.35;transition:opacity .25s}
-.ww-pill{position:absolute;z-index:9;transform:translate(-50%,-100%);display:flex;align-items:center;gap:7px;white-space:nowrap;pointer-events:none;
+.ww-pill{max-width:min(94%,520px);position:absolute;z-index:9;transform:translate(-50%,-100%);display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:center;white-space:normal;pointer-events:none;
   font-family:VT323,Consolas,monospace;font-size:clamp(17px,2.4vw,24px);line-height:1;color:#fff;background:#111;border:3px solid var(--lc);
   box-shadow:3px 3px 0 #000;border-radius:8px;padding:4px 10px 5px 5px;animation:wwin .25s steps(3) both}
 .ww-pill .ww-ln{font-family:'Press Start 2P',Consolas,monospace;font-size:.42em;color:#111;background:var(--lc);border-radius:4px;padding:4px 5px}
@@ -728,6 +744,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
   <aside class="drawer" id="drawer" hidden aria-label="Menu">
     <div class="win"><div class="bar"><span>MENU</span><button class="pill" type="button" data-close>CLOSE</button></div>
       <div class="body">
+        <div id="toolsdock" hidden style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"></div>
         <nav class="tabs menutabs" aria-label="Views">
           <button id="t-play" data-tab="play" hidden>Play</button>
           <button id="t-rules" data-tab="rules">Rules &amp; paytable</button>
@@ -792,10 +809,13 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
   'use strict';
   var K = '#141414';
   var FONT = "Consolas,'Lucida Console',Menlo,monospace";
-  var IDS = ['cassette', 'sneaker', 'spray', 'lighter', 'wheels', 'trucks', 'face', 'board', 'wild', 'scatter'];
+  var IDS = ['cassette', 'sneaker', 'spray', 'lighter', 'cap', 'wheels', 'trucks', 'face', 'board', 'wild', 'scatter'];
   var POSES = ['idle', 'ollie', 'kickflip', 'grind', 'bail', 'hype'];
   var TILE = {
     cassette: '#8ea4ba', sneaker: '#bba98c', spray: '#9dbb9a', lighter: '#bb9db0',
+    // the cap used to be drawn outside this module on a '#9fc0a6' plate, which is
+    // the same green as spray's to within 1.06:1 -- it now gets a tan of its own
+    cap: '#c9a6d8',
     wheels: '#54b8ff', trucks: '#b48cff', face: '#b8f03c', board: '#ffcc1f',
     wild: '#6b2cff', scatter: '#ff2d8f'
   };
@@ -920,19 +940,29 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
   }
 
   /* ---------- stick figure ---------- */
+  // One skater, everywhere. The poses used to wear a red CAP with a bare face
+  // while the `face` reel symbol wore a red BEANIE with a white pom and black
+  // shades -- two different characters on the same machine. The poses now carry
+  // the same beanie, cuff, pom and shades, in the same hexes the `face` symbol
+  // uses, so the headwear and eyewear read as one person at any size.
   function head(h, face, rot) {
     var x = h[0], y = h[1], s = '';
     s += blob(x, y, 9, 9, C.white);
-    s += raw('M' + pt(x - 9.6, y - 1.5) + 'Q' + pt(x - 10, y - 12.5) + ' ' + pt(x, y - 12) + 'Q' + pt(x + 10, y - 12.5) + ' ' + pt(x + 9.6, y - 1.5) + 'Q' + pt(x, y - 3.5) + ' ' + pt(x - 9.6, y - 1.5) + 'Z', C.red);
-    s += poly([[x - 8, y - 2], [x - 17.5, y - 1], [x - 16.5, y - 4.5], [x - 8, y - 6.5]], C.red, ' stroke-width="2.5"');
+    // beanie: dome, rolled cuff, pom (matches SYM.face)
+    s += raw('M' + pt(x - 9.4, y - 2.5) + 'Q' + pt(x - 9.8, y - 13.5) + ' ' + pt(x + 0.4, y - 13) + 'Q' + pt(x + 10, y - 13.5) + ' ' + pt(x + 9.6, y - 2.5) + 'Z', C.red);
+    s += rr(x - 10.2, y - 5.2, x + 10.4, y - 1.4, 1.8, C.dred);
+    s += blob(x + 0.4, y - 14.8, 2.9, 2.5, C.white, ' stroke-width="2"');
     if (face === 'ouch') {
       s += line([[x + 1, y - 0.5], [x + 4, y + 2.5]], 0, 1.7) + line([[x + 4, y - 0.5], [x + 1, y + 2.5]], 0, 1.7);
       s += line([[x + 5, y - 0.5], [x + 8, y + 2.5]], 0, 1.7) + line([[x + 8, y - 0.5], [x + 5, y + 2.5]], 0, 1.7);
       s += line([[x + 2, y + 6], [x + 4, y + 5], [x + 6, y + 6.3], [x + 8, y + 5]], 0, 1.6);
     } else {
-      s += blob(x + 2.6, y + 0.8, 1.3, 1.7, K, ' stroke="none"') + blob(x + 6.2, y + 0.8, 1.3, 1.7, K, ' stroke="none"');
-      if (face === 'yell') s += blob(x + 4.6, y + 5.2, 2.4, 2.6, '#7a1020', ' stroke-width="1.6"');
-      else s += line([[x + 1.5, y + 4.4], [x + 4.6, y + 6.2], [x + 7.8, y + 3.8]], 0, 1.8);
+      // shades, same #1e1c24 lenses as the face symbol, scaled to the little head
+      s += rr(x - 7.2, y - 1.2, x + 0.2, y + 2.6, 1.2, '#1e1c24', ' stroke-width="2"');
+      s += rr(x + 1.4, y - 1.2, x + 8.6, y + 2.6, 1.2, '#1e1c24', ' stroke-width="2"');
+      s += line([[x + 0.2, y + 0.4], [x + 1.4, y + 0.4]], 0, 1.6);
+      if (face === 'yell') s += blob(x + 1, y + 5.8, 2.4, 2.6, '#7a1020', ' stroke-width="1.6"');
+      else s += line([[x - 2.4, y + 5], [x + 1, y + 6.6], [x + 4.4, y + 4.6]], 0, 1.8);
     }
     return rot ? grp('rotate(' + rot + ' ' + x + ' ' + y + ')', s) : s;
   }
@@ -1011,18 +1041,22 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 
   /* ---------- symbols ---------- */
   var SYM = {
+    // Geometry scaled 1.18x about (50, 50.5). It used to paint only 56 of the
+    // tile's 96 units tall where face/wild/scatter fill 87-92, so on the grid it
+    // read as a smaller icon on a bigger plate. The coordinates are scaled rather
+    // than the shape transformed, so the 3px outline stays 3px like every sibling.
     cassette: function () {
-      var s = rr(12, 24, 88, 77, 4, '#3b3742');
-      [[17, 29], [83, 29], [17, 72], [83, 72]].forEach(function (q) { s += blob(q[0], q[1], 2, 2, '#9aa0a6', ' stroke-width="1.5"'); });
-      s += rr(21, 29, 79, 60, 3, '#fff1c9');
-      s += tx(50, 42.5, 14, C.red, 'MIX', C.red, 0.8);
-      s += raw('M43 47H57V54H43Z', '#6b3d1e', ' stroke="none"');
-      s += rr(30, 45, 70, 57, 3, 'none');
-      s += raw('M33 48H43V54H33ZM57 48H67V54H57Z', '#1d1b22', ' stroke="none"');
-      s += blob(39, 51, 4.6, 4.6, C.white, ' stroke-width="2.4"') + blob(61, 51, 4.6, 4.6, C.white, ' stroke-width="2.4"');
-      s += dot(39, 51, 1.6) + dot(61, 51, 1.6);
-      s += poly([[27, 77], [32, 65], [68, 65], [73, 77]], C.dark);
-      s += dot(40, 71, 2) + dot(60, 71, 2);
+      var s = rr(5.2, 19.2, 94.8, 81.8, 4.7, '#3b3742');
+      [[11.1, 25.1], [88.9, 25.1], [11.1, 75.9], [88.9, 75.9]].forEach(function (q) { s += blob(q[0], q[1], 2.4, 2.4, '#9aa0a6', ' stroke-width="1.5"'); });
+      s += rr(15.8, 25.1, 84.2, 61.7, 3.5, '#fff1c9');
+      s += tx(50, 41.1, 16, C.red, 'MIX', C.red, 0.8);
+      s += raw('M41.7 46.4H58.3V54.6H41.7Z', '#6b3d1e', ' stroke="none"');
+      s += rr(26.4, 44, 73.6, 58.2, 3.5, 'none');
+      s += raw('M29.9 47.6H41.7V54.6H29.9ZM58.3 47.6H70.1V54.6H58.3Z', '#1d1b22', ' stroke="none"');
+      s += blob(37, 51.1, 5.4, 5.4, C.white, ' stroke-width="2.4"') + blob(63, 51.1, 5.4, 5.4, C.white, ' stroke-width="2.4"');
+      s += dot(37, 51.1, 1.9) + dot(63, 51.1, 1.9);
+      s += poly([[22.9, 81.8], [28.8, 67.6], [71.2, 67.6], [77.1, 81.8]], C.dark);
+      s += dot(38.2, 74.7, 2.4) + dot(61.8, 74.7, 2.4);
       return s;
     },
     sneaker: function () {
@@ -1089,7 +1123,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       s += poly([[18, 52], [38, 44], [62, 44], [82, 52], [82, 60], [62, 56], [38, 56], [18, 60]], C.steel);
       s += line([[26, 53], [74, 53]], C.white, 2.2, ' stroke-opacity=".7"');
       s += rr(6, 50, 18, 62, 2, C.dsteel, ' stroke-width="2.5"') + rr(82, 50, 94, 62, 2, C.dsteel, ' stroke-width="2.5"');
-      s += blob(13, 72, 10, 12, C.orange) + blob(87, 72, 10, 12, C.orange);
+      s += blob(16, 70, 9, 11, C.orange) + blob(84, 70, 9, 11, C.orange);
       s += blob(13, 72, 4, 5, C.steel, ' stroke-width="2"') + blob(87, 72, 4, 5, C.steel, ' stroke-width="2"');
       s += dot(50, 47, 2.6, C.dark);
       return s;
@@ -1114,6 +1148,18 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       s += rr(23, 35, 77, 44, 2, C.dred);
       [31, 39, 47, 55, 63, 70].forEach(function (x) { s += line([[x, 37], [x, 42]], '#ff7a6b', 1.5); });
       s += blob(50, 11, 7, 6, C.white, ' stroke-width="2.5"');
+      return s;
+    },
+    // Redrawn inside the module so it inherits K ink, the 3px stroke, the baked
+    // wobble and the shared palette. The old hand-written version used #1b1b1b
+    // ink, a true <circle>, and five hexes that exist nowhere else in the set.
+    cap: function () {
+      var s = '';
+      s += raw('M22 62Q23 31 50 29Q77 30 78 60Z', C.blue);          // crown
+      s += line([[50, 30], [43, 61]], 0, 2) + line([[50, 30], [60, 60]], 0, 2);   // panel seams
+      s += raw('M58 60Q84 57 91 67Q72 73 45 66Z', '#1c4bb3');        // brim
+      s += blob(50, 29, 4, 3.5, C.magenta, ' stroke-width="2.5"');   // button
+      s += line([[28, 52], [36, 42]], C.white, 2.5, ' stroke-opacity=".6"');
       return s;
     },
     board: function () {
@@ -1142,7 +1188,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     },
     scatter: function () {
       var body = [[17, 26], [83, 26], [87, 30], [87, 70], [83, 74], [17, 74], [13, 70], [13, 30]];
-      var s = star(50, 50, 46, 20, 16, 0, '#ff79c0', ' stroke="none"');
+      var s = star(50, 50, 46, 20, 16, 0, '#ffc2e2');
       var t = '';
       t += poly(body, 'none', ' stroke="#fff36b" stroke-width="13" stroke-opacity=".45"');
       t += poly(body, 'none', ' stroke="#fffbd0" stroke-width="7.5"');
@@ -1232,7 +1278,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
   function mf(m) { return 440 * Math.pow(2, (m - 69) / 12); }
   function log10(x) { return Math.log(x) / Math.LN10; }
   function log2(x) { return Math.log(x) / Math.LN2; }
-  function ok() { return !!ctx && !muted && ctx.state !== 'closed'; }
+  function ok() { return !!ctx && !muted && ctx.state === 'running'; }
   function tNow(pad) { return ctx.currentTime + (pad || 0.01); }
 
   function safe(fn, fallback) {
@@ -1458,6 +1504,11 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       f.exponentialRampToValueAtTime(lpBase(), now + 0.8);
     }
   }
+  function resumeCtx() {
+    if (!ctx) return false;
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) { return false; } }
+    return ctx.state === 'running';
+  }
   function acquireDuck() {
     duckCount++;
     if (duckCount === 1) applyDuck(true);
@@ -1470,6 +1521,9 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     };
   }
   function duckFor(sec) { var rel = acquireDuck(); setTimeout(rel, sec * 1000); }
+  // Hard release: every outstanding duck handle becomes a no-op the next time it
+  // runs, because duckCount is already 0 and applyDuck(false) has been applied.
+  function clearDuck() { if (!ctx) return; duckCount = 0; applyDuck(false); }
   function lpTo(when) {
     if (duckCount > 0) return;  // release will land on the right value
     var f = N.musicLP.frequency;
@@ -2124,6 +2178,8 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     reelStop: safe(reelStop),
     scatterLand: safe(scatterLand),
     anticipation: safe(anticipation),
+    clearDuck: safe(clearDuck),
+    resume: safe(resumeCtx, false),
     wildLand: safe(wildLand),
     win: safe(win),
     countUp: safe(countUp, noop),
@@ -2861,6 +2917,10 @@ const fmtBal = units => money(units/API, false);
 
 /* ---------- state ---------- */
 let balance = 0, levels = [], betIdx = 0, bet = 1, roundBet = 1, mode = 'BASE', busy = false, autoLeft = 0;
+// The pending autoplay tick is held so STOP can actually cancel it. Without this,
+// stopping during the gap between rounds still wagered one more spin.
+let autoTimer = 0;
+function stopAuto(){ autoLeft = 0; if (autoTimer){ clearTimeout(autoTimer); autoTimer = 0; } }
 let flags = {}, social = q.get('social') === 'true', replay = q.get('replay') === 'true';
 const sess = {spins: 0, wag: 0, won: 0, t0: Date.now()};
 let speed = 0; try { speed = Math.min(2, Math.max(0, +localStorage.getItem('sk8.speed2') || 0)); } catch(e) {}
@@ -2869,20 +2929,12 @@ const T = ms => ms * [1, .4, .12][speed];
 
 
 /* ---------- symbols ---------- */
-function capSVG(dim){
-  return `<svg viewBox="0 0 100 100" width="100%" height="100%" ${dim?'style="filter:saturate(.15);opacity:.42"':''}><g stroke="#1b1b1b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-    <rect x="2" y="2" width="96" height="96" rx="16" fill="#9fc0a6"/><path d="M9 32Q9 9 32 9" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3.5"/>
-    <path d="M22 62Q23 31 50 29Q76 30 78 60Z" fill="#2f6fe0"/><path d="M50 29Q42 44 43 61" fill="none" stroke-width="2"/><path d="M50 29Q60 44 60 60" fill="none" stroke-width="2"/>
-    <path d="M58 60Q84 57 91 67Q72 73 45 66Z" fill="#1c4bb3"/><circle cx="50" cy="29" r="3.5" fill="#ff3ea5"/>
-    <path d="M28 52Q30 44 36 42" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2.5"/></g></svg>`;
-}
 let legendCache = null;
 function symHTML(s, opts){
   opts = opts || {};
   if (!Art) return `<div class="fb">${SHORT[s]}${opts.mult ? '<br>x'+opts.mult : ''}</div>`;
-  if (s === 4) return capSVG(opts.dim);
   if (s === S2){ if (!legendCache) legendCache = Art.symbol('scatter', {}).replace(/font-size="20"([^>]*)>SESH</g, 'font-size="12"$1>LEGEND<').replace('<svg', '<svg style="filter:hue-rotate(155deg) saturate(1.3)"'); return legendCache; }
-  const id = ['cassette','sneaker','spray','lighter',null,'wheels','trucks','face','board','wild','scatter'][s];
+  const id = ['cassette','sneaker','spray','lighter','cap','wheels','trucks','face','board','wild','scatter'][s];
   return Art.symbol(id, s === W ? {mult: opts.mult, sticky: opts.sticky, dim: opts.dim} : {dim: opts.dim});
 }
 
@@ -2907,9 +2959,16 @@ const comboSteps = wins => wins.filter(w=>w.combo).map(w=>w.combo).sort((a,b)=>a
 // +1x +2x +3x, or a range once the list gets long
 const stepText = (st, sep) => st.length > 3 ? `+${st[0]}x${sep || " TO "}+${st[st.length-1]}x` : st.map(n=>"+"+n+"x").join(" ");
 function drawLines(wins, ramps){ drawLines_base(wins, ramps); if (window.Sk8WinWalk) Sk8WinWalk.after(wins, roundBet, fmt$, NAMES); }
+// Remembered so the overlay can be rebuilt at the right size. Drawing it while the
+// play tab is hidden measured the grid as 0x0 and collapsed every line into the
+// corner with a hugely oversized amount label.
+let lastLines = null;
 function drawLines_base(wins, ramps){
+  lastLines = {wins, ramps};
   const svg = $('lineov'); svg.innerHTML = ''; cells.forEach(c=>c.classList.remove('hit'));
-  const gb = gridEl.getBoundingClientRect(); svg.setAttribute('viewBox', `0 0 ${Math.max(1,gb.width)} ${Math.max(1,gb.height)}`);
+  const gb = gridEl.getBoundingClientRect();
+  if (gb.width < 2 || gb.height < 2) return;        // not laid out: redrawn on the way back
+  svg.setAttribute('viewBox', `0 0 ${gb.width} ${gb.height}`);
   const ctr = (r,row) => { const b = cells[TT.cell(r,row)].getBoundingClientRect(); return [b.left-gb.left+b.width/2, b.top-gb.top+b.height/2]; };
   wins.forEach(w=>{ const ln = TT.LINES[w.li];
     const pl = document.createElementNS('http://www.w3.org/2000/svg','polyline'); // draw only through the winning symbols (the first w.k reels), not across the whole board
@@ -2998,12 +3057,21 @@ function applyAudio(){
       Snd.setSfxVolume(soundOn ? +$('sfxvol').value/100 : 0);
       Snd.setMusicVolume(+$('musicvol').value/100);
       if (musicOn) Snd.startMusic(); else Snd.stopMusic();
-      if (!soundOn) Snd.anticipation(false);
+      if (!soundOn){ Snd.anticipation(false); if (Snd.clearDuck) Snd.clearDuck(); }
     }
   } catch(e){}
   [['soundbtn', 'SFX', soundOn], ['musicbtn', 'MUSIC', musicOn]].forEach(([id, label, on]) => { const b = $(id); b.textContent = `${label}: ${on ? 'ON' : 'OFF'}`; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
 }
 $('soundbtn').onclick = () => { if (!Snd){ $('msg').textContent = 'Sound module not loaded.'; return; } soundOn = !soundOn; applyAudio(); };
+// An audio context suspended AFTER start -- an iOS interruption, a long spell in a
+// background tab -- used to recover only if the player happened to press MUSIC or
+// SFX, and while suspended isReady() is false, which disables the volume sliders
+// too. Nudge it back on the way to the foreground and on the next real gesture.
+(function(){
+  const kick = () => { try { if (Snd && Snd.resume && (soundOn || musicOn)) Snd.resume(); } catch(e) {} };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
+  ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, kick, {passive: true}));
+})();
 $('musicbtn').onclick = () => { if (!Snd){ $('msg').textContent = 'Sound module not loaded.'; return; } musicOn = !musicOn; applyAudio(); };
 $('musicvol').addEventListener('input', e => { if (Snd && Snd.isReady && Snd.isReady()) try { Snd.setMusicVolume(+e.target.value/100); } catch(err){} });
 $('sfxvol').addEventListener('input', e => { if (soundOn && Snd && Snd.isReady && Snd.isReady()) try { Snd.setSfxVolume(+e.target.value/100); } catch(err){} });
@@ -3037,7 +3105,7 @@ async function spinAnim(g, mults, sticky, fast, isBonus, opt){
     const nFill = Math.max(6, Math.round(dur[r]/(isBonus ? 85 : 70))); for (let i=0;i<nFill;i++) items.push(symHTML(randInt(9)));
     for (let row=0; row<ROWS; row++) items.push(cells[TT.cell(r,row)].innerHTML);
     const st = document.createElement('div'); st.className = 'strip blur'; st.innerHTML = items.map(h=>`<div class="sc" style="height:${cellH}px">${h}</div>`).join('');
-    const D = (items.length-ROWS)*pitch; st.style.transform = `translateY(${-D}px)`; col.appendChild(st);
+    const D = (items.length-ROWS)*pitch; st.style.transform = `translateY(${-D}px)`; col.appendChild(st); col.classList.add('rolling');
     for (let row=0;row<ROWS;row++){ const c = TT.cell(r,row); if (!(sticky && sticky[c])) cells[c].classList.add('spinning'); }
     return {st, D, landed: false, crawl};
   });
@@ -3049,7 +3117,7 @@ async function spinAnim(g, mults, sticky, fast, isBonus, opt){
         if (p < p0) y = -R.D + (R.D+over)*v*p; else if (p < .96){ const q = (p-p0)/(.96-p0); y = -R.D + (R.D+over)*(v*p0 + (1-v*p0)*(1-(1-q)*(1-q))); } else { const q = (p-.96)/.04; y = over*Math.cos(q*Math.PI/2); } }
       else if (p < .86){ const q = p/.86; y = -R.D + (R.D+over)*(1 - Math.pow(1-q, 2.4)); } else { const q = (p-.86)/.14; y = over*Math.cos(q*Math.PI/2); }
       R.st.style.transform = `translateY(${y.toFixed(1)}px)`; if (p > .55) R.st.classList.remove('blur');
-      if (p >= 1){ R.landed = true; R.st.remove(); reelOff(r); reelEls[r].querySelectorAll('.pinov').forEach(o=>o.remove());
+      if (p >= 1){ R.landed = true; R.st.remove(); reelEls[r].classList.remove('rolling'); reelOff(r); reelEls[r].querySelectorAll('.pinov').forEach(o=>o.remove());
         for (let row=0;row<ROWS;row++){ const c = TT.cell(r,row); cells[c].classList.remove('spinning'); paintCell(c, dg[c], dm[c], sticky && sticky[c] > 0);
           if (dg[c]===S1){ n1++; if (n1 >= 2) sfx('scatterLand', n1); if (r < REELS-1 && n1 === 3) banner('SESH BONUS! ONE MORE TAPE FOR LEGEND'); if (r < REELS-1 && n1 === 4) banner('LEGEND! ONE MORE TAPE FOR 12 SPINS'); } else if (dg[c]===S2){ n2++; if (n2 >= 2) sfx('scatterLand', n2); } else if (dg[c]===W && !(sticky && sticky[c])) sfx('wildLand', dm[c]); }
         sfx('reelStop', r); if (r+1 === antFrom && !antOn){ antOn = true; sfx('anticipation', true); banner(n1 >= 3 ? 'SESH BONUS! ONE MORE TAPE FOR LEGEND' : 'TWO SESH TAPES... ONE MORE!'); document.body.classList.add('chase'); for (let k=antFrom;k<REELS;k++){ reelEls[k].classList.add('tease'); reelEls[k].classList.toggle('legend', antLegend); } }
@@ -3090,7 +3158,7 @@ async function celebrate(x, amount, cost, unitLabel){
   cel.hidden = true; skipCel = null; if (window.Sk8Anim) Sk8Anim.stop(art);
   $('msg').innerHTML = `<strong class="good">${reached[reached.length-1][1]} ${fmt$(amount)}</strong> (${fx(x)}x)`;
 }
-$('celebrate').onclick = () => { if (skipCel) skipCel(); };
+$('celebrate').onclick = () => { if (skipCel && !flags.disabledSlamstop) skipCel(); };
 // a plain count-up for a free spin's big hit or a bonus total
 async function plainCount(amount, title, dur){
   dur = Math.max(dur, T(1600 + 1000*Math.log10(Math.max(1, amount/roundBet))));
@@ -3106,7 +3174,7 @@ async function plainCount(amount, title, dur){
   cel.hidden = true; skipCel = null; if (window.Sk8Anim) Sk8Anim.stop(art);
 }
 const bigHitTitle = x => { const top = LADDER.filter(([th]) => x >= th).pop(); return top ? top[1] : 'BIG HIT'; };
-function resetWinBoxes(){ $('totalbox').hidden = true; }
+function resetWinBoxes(){ lastLines = null; $('totalbox').hidden = true; }
 // end of a round: bonuses always count their total up; the trick ladder (vs your bet) only when the bonus paid more than it cost
 async function finishRound(res, win, cost){
   if (res && res.bonus && win > 0){
@@ -3222,7 +3290,7 @@ async function offerLoad(text){
   const v = await modal('LOAD PLAY MONEY', '<p style="margin:0">' + text + '</p>', deposits.map((d, i) => ({label: loadLabel(d), value: d, primary: i === 1})).concat([{label: 'NOT NOW', value: 0}]));
   if (v) await loadMoney(v);
 }
-function showError(e){ autoLeft = 0; if (e.code === 'ERR_IPB'){ $('msg').textContent = errText(e); offerLoad('Not enough balance for this bet.'); return; } modal('NOTICE', `<p style="margin:0">${errText(e)}</p>`, [{label: 'OK'}]); $('msg').textContent = errText(e); }
+function showError(e){ stopAuto(); if (e.code === 'ERR_IPB'){ $('msg').textContent = errText(e); offerLoad('Not enough balance for this bet.'); return; } modal('NOTICE', `<p style="margin:0">${errText(e)}</p>`, [{label: 'OK'}]); $('msg').textContent = errText(e); }
 
 /* ---------- modal ---------- */
 function modal(title, html, actions){
@@ -3254,22 +3322,37 @@ async function animateRound(res, cost){
 async function playRound(name){
   const amount = levels[betIdx], cost = amount/API*costOf(name);
   if (busy) return;
-  if (balance < amount*costOf(name)){ autoLeft = 0; $('msg').textContent = ERRORS.ERR_IPB; meta(); return; }
+  // this round supersedes any autoplay tick still pending, so it can never fire twice
+  if (autoTimer){ clearTimeout(autoTimer); autoTimer = 0; }
+  if (balance < amount*costOf(name)){ stopAuto(); $('msg').textContent = ERRORS.ERR_IPB; meta(); return; }
   busy = true; roundBet = amount/API; $('msg').textContent = ''; clearStacks(); resetWinBoxes(); meta();
   banner(name === 'BASE' ? '3 WILDS OR 3 SESH TAPES START A BONUS · 4 TAPES = LEGEND' : name === 'ANTE' ? 'BONUS BOOST' : name.startsWith('SPECIAL') ? `${TRICK[+name.slice(-1)-1]} · TRICK SPIN` : `${BONUS[+name.slice(-1)-1].name.toUpperCase()} BONUS`);
   const t0 = performance.now();
   let d;
   try { d = await RGS.play(amount, name); }
   catch(e){ busy = false; meta(); showError(e); return; }
-  balance = d.balance.amount; meta();
-  const res = ttFromBook(bookEvents(d.round)), win = await animateRound(res, cost);
-  const minMs = +flags.minimumRoundDuration || 0, el = performance.now() - t0;
-  if (minMs > el) await wait(minMs - el);
-  if (d.round.active){ try { const e = await RGS.endRound(); balance = e.balance.amount; } catch(e){ showError(e); } }
-  sess.spins++; sess.wag += cost; sess.won += win;
-  $('spinsub').textContent = `${name === 'BASE' ? 'Spin' : name} · bet ${fmt$(cost)} · won ${fmt$(win)}`;
-  busy = false; meta();
-  if (autoLeft > 0 && UI_MODES.some(m => m.id === name)){ autoLeft--; setTimeout(() => playRound(mode), [450, 150, 250][speed]); } else autoLeft = 0;
+  // Everything past this point is presentation of a result the server has already
+  // settled. It is wrapped so that a throw in the book reader or the animation can
+  // never strand `busy` -- that used to lock the whole UI until a page reload.
+  try {
+    balance = d.balance.amount; meta();
+    const res = ttFromBook(bookEvents(d.round)), win = await animateRound(res, cost);
+    const minMs = +flags.minimumRoundDuration || 0, el = performance.now() - t0;
+    if (minMs > el) await wait(minMs - el);
+    if (d.round.active){ try { const e = await RGS.endRound(); balance = e.balance.amount; } catch(e){ showError(e); } }
+    sess.spins++; sess.wag += cost; sess.won += win;
+    $('spinsub').textContent = `${name === 'BASE' ? 'Spin' : name} · bet ${fmt$(cost)} · won ${fmt$(win)}`;
+  } catch(err){
+    stopAuto();
+    try { console.error('[sk8] round presentation failed', err); } catch(e) {}
+    showError(err && err.code ? err : {code: 'ERR_GEN'});
+  } finally {
+    busy = false; meta();
+  }
+  if (autoLeft > 0 && UI_MODES.some(m => m.id === name)){
+    autoLeft--;
+    autoTimer = setTimeout(() => { autoTimer = 0; if (!busy) playRound(mode); }, [450, 150, 250][speed]);
+  } else autoLeft = 0;
   meta();
 }
 // a round left open (closed tab, lost connection): show it, then close it so the win is paid
@@ -3277,7 +3360,12 @@ async function resumeRound(round){
   busy = true; meta();
   roundBet = (round.amount || levels[betIdx]) / API;   // round.amount is the base bet the round was played at
   $('msg').textContent = 'Finishing your last round...';
-  const res = ttFromBook(bookEvents(round)); await animateRound(res, roundBet*(MODE(round.mode) ? MODE(round.mode).cost : 1));
+  try {
+    const res = ttFromBook(bookEvents(round)); await animateRound(res, roundBet*(MODE(round.mode) ? MODE(round.mode).cost : 1));
+  } catch(err){
+    // a book we cannot read must still not strand the player: close the round anyway
+    try { console.error('[sk8] could not replay the open round', err); } catch(e) {}
+  }
   try { const e = await RGS.endRound(); balance = e.balance.amount; } catch(e){ showError(e); }
   busy = false; meta();
 }
@@ -3328,10 +3416,13 @@ async function confirmBuy(name){
 function meta(){
   const cost = levels.length ? levels[betIdx]*costOf(mode) : 0;
   $('balance').textContent = fmtBal(balance); $('cost').textContent = fmtBal(cost);
-  $('bet').disabled = busy || autoLeft > 0;
+  // a scheduled-but-not-yet-started autoplay tick still counts as autoplay running,
+  // so the button stays STOP through the gap between rounds
+  const auto = autoLeft > 0 || !!autoTimer;
+  $('bet').disabled = busy || auto;
   const can = !busy && balance >= cost && levels.length;
-  $('spinbtn').disabled = !can && !autoLeft; $('spinbtn').textContent = autoLeft ? `STOP (${autoLeft})` : mode === 'BASE' ? 'SPIN' : mode === 'ANTE' ? 'BOOST SPIN' : TRICK[+mode.slice(-1)-1] + ' SPIN';
-  $('autobtn').disabled = !can || autoLeft > 0;
+  $('spinbtn').disabled = !can && !auto; $('spinbtn').textContent = auto ? `STOP${autoLeft ? ` (${autoLeft})` : ''}` : mode === 'BASE' ? 'SPIN' : mode === 'ANTE' ? 'BOOST SPIN' : TRICK[+mode.slice(-1)-1] + ' SPIN';
+  $('autobtn').disabled = !can || auto;
   renderModes(); renderJuris(); slotChrome();
 }
 function renderJuris(){
@@ -3345,7 +3436,7 @@ function renderBets(){
   $('bet').innerHTML = levels.map((l, i) => `<option value="${i}">${fmtBal(l)}</option>`).join(''); $('bet').value = String(betIdx);
 }
 $('bet').onchange = e => { betIdx = +e.target.value; bet = levels[betIdx]/API; meta(); };
-$('spinbtn').onclick = () => { if (autoLeft){ autoLeft = 0; meta(); return; } playRound(mode); };
+$('spinbtn').onclick = () => { if (autoLeft || autoTimer){ stopAuto(); meta(); return; } playRound(mode); };
 $('autobtn').onclick = async () => {
   if (busy || flags.disabledAutoplay) return;
   const n = await modal('AUTOPLAY', `<p style="margin:0">Play automatically at <strong>${fmtBal(levels[betIdx]*costOf(mode))}</strong> per spin. Autoplay stops when a bonus starts, when you press STOP, or when the balance runs low.</p><p class="sub" style="margin:8px 0 0">How many spins?</p>`,
@@ -3362,7 +3453,7 @@ document.addEventListener('keydown', e => {
   if (/INPUT|SELECT|BUTTON|TEXTAREA/.test(document.activeElement.tagName)) return;
   e.preventDefault();
   if (skipCel){ if (!flags.disabledSlamstop) skipCel(); return; }
-  if (autoLeft){ autoLeft = 0; meta(); return; }
+  if (autoLeft || autoTimer){ stopAuto(); meta(); return; }
   playRound(mode);
 });
 const TABS = ['play','rules','history'];
@@ -3384,7 +3475,12 @@ async function renderHistory(){
       + '</tbody></table>' : '<p style="margin:0">No rounds yet.</p>')
     + '<p class="sub" style="margin:10px 0 0">Session ' + RGS.sessionID + '</p></div></div>';
 }
-function showTab(name){ TABS.forEach(t => { $('tab-'+t).hidden = t !== name; $('t-'+t).setAttribute('aria-selected', t === name); }); }
+function showTab(name){
+  TABS.forEach(t => { $('tab-'+t).hidden = t !== name; $('t-'+t).setAttribute('aria-selected', t === name); });
+  // coming back to the board: the grid has a size again, so rebuild any win lines
+  // that were drawn (or skipped) while it was hidden
+  if (name === 'play' && lastLines) requestAnimationFrame(() => { if (lastLines) drawLines_base(lastLines.wins, lastLines.ramps); });
+}
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { openLayer(null); showTab(b.dataset.tab); if (b.dataset.tab === 'history') renderHistory(); });
 document.querySelectorAll('[data-tab-back]').forEach(b => b.onclick = () => showTab('play'));
 /* slot chrome: menu, modes/buy sheet, bet -/+ */
@@ -3494,7 +3590,8 @@ async function bootPlay(){
   if (a.round && a.round.active) await resumeRound(a.round);
   else if (balance < levels[0]) offerLoad('Load some play money to start.');
   // keep the balance fresh while idle
-  setInterval(async () => { if (busy) return; try { const b = await RGS.balance(); balance = b.balance.amount; meta(); } catch(e) {} }, 60000);
+  setInterval(async () => { if (busy) return; try { const b = await RGS.balance(); if (busy) return;   // a round started while this was in flight: its balance is newer
+    balance = b.balance.amount; meta(); } catch(e) {} }, 60000);
 }
 async function bootReplay(){
   document.body.classList.add('replay'); $('replaybar').hidden = false;
@@ -3774,7 +3871,7 @@ else { $('msg').textContent = 'Connecting to the casino...'; $('spinbtn').disabl
 
 try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
 </script>
-<div id="devcycle"><button data-phase="0">DAY</button><button data-phase="108">NIGHT</button><button data-phase="resume">RESUME</button><b>RUNNING</b></div>
+<div id="devcycle" hidden><button data-phase="0">DAY</button><button data-phase="108">NIGHT</button><button data-phase="resume">RESUME</button><b>RUNNING</b></div>
 <script>
 /* Size the skater layer exactly like the park backdrop's `cover` sizing
    (16:9, centred horizontally, anchored to the bottom) so the sprites stay
@@ -3812,6 +3909,11 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
   /* ===== TEMPORARY dev control ===== */
   (function(){
     var panel = document.getElementById('devcycle');
+    // Day/night scrubber: a development control, not part of the game. It stays
+    // hidden unless the address asks for it, so players never see it.
+    if (!panel) return;
+    if (!/[?&]dev=1(&|$)/.test(location.search)) { panel.remove(); return; }
+    panel.hidden = false;
     if (!panel) return;
     var tag = panel.querySelector('b'), arrive = null;
     var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights,.signalbeam,.signaldisc';
@@ -3875,6 +3977,37 @@ try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
 
   ride('skRail', 'stairclimb');
   ride('skIdle', 'idle');
+})();
+</script>
+<script>
+/* AUTOPLAY / SPEED / MODE in a short portrait pop-out.
+   The control bar hides .tools below that breakpoint (styles, mini-player query)
+   and the drawer offered no substitute, so those three controls had no entry
+   point at all. Rather than duplicate them -- which would mean two sets of
+   handlers to keep in sync -- the same nodes are moved into the drawer while
+   the query matches, and moved back when it stops. */
+(function () {
+  var tools = document.querySelector('.ctrlbar .tools') || document.querySelector('.tools');
+  var dock = document.getElementById('toolsdock');
+  if (!tools || !dock || !window.matchMedia) return;
+  var home = tools.parentNode, mark = document.createComment('tools');
+  home.insertBefore(mark, tools);
+  var mq = window.matchMedia('(max-height:560px) and (max-width:720px) and (orientation:portrait)');
+  function place() {
+    if (mq.matches) {
+      if (tools.parentNode !== dock) { dock.appendChild(tools); }
+      tools.style.display = 'flex';
+      tools.style.flexWrap = 'wrap';
+      dock.hidden = false;
+    } else {
+      if (tools.parentNode !== home) { home.insertBefore(tools, mark); }
+      tools.style.display = '';
+      tools.style.flexWrap = '';
+      dock.hidden = true;
+    }
+  }
+  place();
+  if (mq.addEventListener) mq.addEventListener('change', place); else mq.addListener(place);
 })();
 </script>
 </body>
