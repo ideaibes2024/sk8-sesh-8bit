@@ -28,3 +28,40 @@ To test a build against these, point the mock at that build's directory:
 `node tools/test/mock-rgs.js /path/to/other/build 8788`.
 
 Scenarios are queued per spin: `POST /_test {"queue":["win5","legend"]}`.
+
+## Local play mode
+
+This clone cannot reach the game server, so the page falls back to the math
+engine it already ships and plays rounds in the browser. `?local=1` forces it.
+
+The config in `index.html` (`LOCAL_CFG`) was solved offline by these, in order:
+
+```bash
+node tools/test/search.js          # symbol counts that hit the published 1-in-413 trigger
+node tools/test/tune2.js  8000     # wild density + table mix per bought mode
+node tools/test/final.js  60000    # compose base RTP from exact lines + measured tier EVs
+node tools/test/ante.js            # same for Bonus Boost
+node tools/test/emit.js            # emit the LOCAL_CFG literal
+node tools/test/verify-embedded.js # re-check the literal AS SHIPPED in index.html
+```
+
+`final.js` composes rather than samples: the base game end to end is swamped by
+Legend bonuses at 1 in ~90,000 paying hundreds of x, so a 250k-spin estimate
+swings several points. Line RTP is exact from `ttAnalyzeBase`; each tier's EV is
+measured by playing that tier directly.
+
+Verified against the shipped bytes:
+
+| | local engine | published |
+|---|---|---|
+| base RTP | 96.11% | 96.01% |
+| base bonus | 1 in 418 | 1 in 413 |
+| Bonus Boost RTP | 96.21% | 96.01% |
+| Bonus Boost bonus | 1 in 102 | 1 in 105 |
+| Crew / Sesh / Legend buys | 97% / 93% / 92% of price | 96% |
+
+```bash
+node tools/test/static.js "$PWD" 8795   # plain file server, no /wallet at all
+node tools/test/drivelocal.js           # boots, falls back, plays 40 rounds
+node tools/test/soak.js                 # 220 rounds, watches bonuses trigger
+```

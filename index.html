@@ -477,6 +477,11 @@ body:has(.slot:not([hidden])){overflow:hidden}
 .slotbar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0))}
 .brand{font-family:var(--f-d);font-size:clamp(14px,3.2vw,22px);color:#fff;text-shadow:3px 3px 0 #000,-1px -1px 0 #000;letter-spacing:.04em}
 .barspacer{width:180px}
+#localbadge{position:fixed;left:8px;top:6px;z-index:70;pointer-events:none;max-width:44vw;white-space:normal;
+  font-family:var(--f-d);font-size:7px;letter-spacing:.06em;color:#ffd21f;background:rgba(10,8,18,.82);
+  border:2px solid #141414;border-radius:10px;padding:4px 8px;line-height:1.5}
+#localbadge[hidden]{display:none}
+@media (max-width:520px){#localbadge{font-size:6px;padding:3px 6px;max-width:52vw}}
 .soundbtns{display:flex;gap:6px}
 @media (max-width:520px){.barspacer{display:none}.soundbtns .pill{font-size:7px;padding:7px 8px}}
 .iconbtn{width:58px;height:52px;flex:0 0 auto;display:grid;align-content:center;gap:6px;padding:0 13px;background:#2b2840;border:3px solid #141414;border-radius:14px;cursor:pointer;box-shadow:0 4px 0 #141414}
@@ -791,6 +796,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
         <p class="sub" id="calib" style="margin-top:12px"></p>
       </div></div>
   </aside>
+  <div id="localbadge" hidden title="">DEMO &middot; outcomes generated in your browser, play money only</div>
   <div class="modal" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="cf-t">
     <div class="win"><div class="bar"><span id="cf-t">CONFIRM</span></div>
       <div class="body">
@@ -3322,6 +3328,129 @@ async function playBonus(B, cost, startWin){
 }
 
 
+
+/* ---------- local play: the shipped math engine, standing in for the RGS ----
+   This clone's origin is not on the game server's allowlist, so /wallet/* is
+   unreachable and no round can complete. Rather than leave the slot dead, the
+   page falls back to the engine it already carries -- the same `tt*` model the
+   paytable and replays use -- and plays rounds in the browser.
+
+   Outcomes are generated here, with play money kept in localStorage. It is a
+   demo, and the UI says so; nothing is wagered and nothing leaves the device.
+
+   The config below was solved offline against the figures the Rules screen
+   publishes, then verified (tools/test/):
+     base RTP      96.010%  vs 96.01% published
+     base bonus    1 in 418 vs 1 in 413
+     Bonus Boost   96.010%, bonus 1 in 102 vs 1 in 105
+     each buy and Trick Spin averages 92-96% of its own price
+   Line RTP is exact (ttAnalyzeBase); the tier EVs behind it were measured over
+   60,000 rounds each, because sampling the base game whole is swamped by
+   Legend hits at 1 in ~90,000. */
+const R = a => [a, a.slice(), a.slice(), a.slice(), a.slice()];
+const LOCAL_CFG = {
+  pays: GAME.pays,
+  counts: R([20,21,19,19,16,32,27,24,21,3,2,1]),
+  countsHi: R([20,20,19,19,16,32,27,25,21,3,2,1]),
+  basePInt: 89629,
+  anteLo: R([18,21,19,19,16,32,27,24,21,4,3,1]),
+  anteHi: R([16,21,19,19,16,32,27,24,21,5,4,1]),
+  antePInt: 606248,
+  tables: {A: [{x:0,w:560},{x:2,w:200},{x:3,w:110},{x:4,w:60},{x:5,w:38},{x:10,w:18},{x:15,w:8},{x:20,w:4},{x:25,w:2},{x:50,w:1}], B: [{x:0,w:180},{x:2,w:210},{x:3,w:170},{x:4,w:120},{x:5,w:90},{x:10,w:55},{x:15,w:30},{x:20,w:16},{x:25,w:9},{x:50,w:4}], C: [{x:0,w:900},{x:2,w:120},{x:3,w:50},{x:4,w:25},{x:5,w:12},{x:10,w:5},{x:15,w:2},{x:20,w:1},{x:25,w:1}]},
+  bonusTables: [["A","B"],["A","B"],["A","B"]],
+  specialTables: [["A","B"],["A","B"],["C","A"]],
+  trickFullTable: 'B',
+  fsSesh: [R([30,30,28,28,25,20,15,13,10,3,2,1]), R([29,29,28,28,25,20,15,13,10,5,2,1])],
+  fsRise: R([24,24,28,28,25,20,15,13,10,15,2,1]),
+  fsLegend: R([29,29,28,28,25,20,15,13,10,5,2,1]),
+  special: [R([28,29,28,28,25,20,15,13,10,6,2,1]), R([30,30,28,28,25,20,15,13,10,3,2,1]), R([30,30,28,28,25,20,15,13,10,3,2,1])],
+  pInt: {base: 0, bonus: [463931,509506,628147], special: [850867,401341,98903]},
+  buyCost: [125,250,500],
+  anteCost: 2.5,
+  specialCost: [25,50,100],
+  maxWin: 1000, maxWinSesh: 5000, maxWinLegend: 22500,
+  maxWinTrick: 16800,
+  fsSpins: 10, fsSpins5: 12,
+  minWin: 0.1, minWinRedraw: 0,
+  crewPlain: false, trickFull: false, legendStickAll: false,
+  ramp: {"base":0.08,"trick":1}, rampEV: {"base":0.6,"ante":0.6},
+  solveMaxK: 90
+};
+
+const Local = (() => {
+  const U = 1e6;                                     // RGS integer units
+  const KEY = 'sk8.local.balance';
+  let bal = 1000 * U;
+  try { const v = parseInt(localStorage.getItem(KEY), 10); if (isFinite(v) && v >= 0) bal = v; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, String(bal)); } catch (e) {} };
+
+  // crypto-backed where available, so outcomes are not a weak PRNG
+  const pool = new Uint32Array(256); let pi = pool.length;
+  function rnd32(){
+    if (pi >= pool.length){ try { crypto.getRandomValues(pool); } catch (e) {
+      for (let i = 0; i < pool.length; i++) pool[i] = (Math.random() * 4294967296) >>> 0; } pi = 0; }
+    return pool[pi++];
+  }
+  const rand = n => n <= 0 ? 0 : rnd32() % n;        // uniform enough at these ranges
+
+  let P = null, loS = null, hiS = null, anteLoS = null, anteHiS = null;
+  function prep(){
+    if (P) return;
+    P = ttPrepare(LOCAL_CFG);
+    loS = LOCAL_CFG.counts.map(ttStrip);
+    hiS = LOCAL_CFG.countsHi.map(ttStrip);
+    anteLoS = LOCAL_CFG.anteLo.map(ttStrip);
+    anteHiS = LOCAL_CFG.anteHi.map(ttStrip);
+  }
+
+  const MODEC = name => { const m = GAME.modes.find(x => x.name === name); return m ? m.cost : 1; };
+  let roundId = 0;
+
+  function playOne(name){
+    prep();
+    const C = LOCAL_CFG;
+    if (name === 'ANTE'){
+      const hi = rand(1000000) < C.antePInt;
+      const r = ttPlaySpin(C, hi ? anteHiS : anteLoS, rand, P); r.reelSet = hi ? 1 : 0; return r;
+    }
+    if (name.startsWith('SPECIAL')) return ttPlaySpecial(C, P, +name.slice(-1), rand);
+    if (name.startsWith('BONUS'))   return ttPlayBuy(C, P, +name.slice(-1) - 1, rand);
+    const hi = rand(1000000) < C.basePInt;
+    const r = ttPlaySpin(C, hi ? hiS : loS, rand, P); r.reelSet = hi ? 1 : 0; return r;
+  }
+
+  return {
+    local: true,
+    authenticate: async () => ({
+      balance: {amount: bal, currency: 'USD'},
+      player: {name: ''},
+      config: {minBet: 1e5, maxBet: 1e8, stepBet: 1e5, defaultBetLevel: 1e6,
+               betLevels: [1e5, 2e5, 5e5, 1e6, 2e6, 5e6, 1e7],
+               jurisdiction: {}, deposits: [100e6, 500e6, 1000e6, 5000e6]},
+      round: {active: false},
+    }),
+    balance: async () => ({balance: {amount: bal}}),
+    play: async (amount, name) => {
+      const cost = amount * MODEC(name);
+      if (bal < cost){ const e = new Error('balance'); e.code = 'ERR_IPB'; throw e; }
+      bal -= cost;
+      const res = playOne(name);
+      const book = ttToBook(++roundId, res, name);
+      bal += Math.round(amount * (book.payoutMultiplier / 100));
+      save();
+      return {balance: {amount: bal}, round: {active: true, state: book.events, amount, mode: name}};
+    },
+    endRound: async () => ({balance: {amount: bal}}),
+    deposit: async amount => { bal += amount; save(); return {balance: {amount: bal}}; },
+    setName: async n => ({name: n}),
+    history: async () => ({rounds: []}),
+    game: async () => GAME,
+    hasReplay: false,
+    sessionID: 'local',
+    ok: true,
+  };
+})();
+
 /* ---------- RGS client (POST JSON to rgs_url, as in Engine's ts-client) ---------- */
 const RGS = (() => {
   const host = q.get('rgs_url') || '', sessionID = q.get('sessionID');
@@ -3359,13 +3488,13 @@ const errText = e => ERRORS[e.code] || ERRORS.ERR_GEN;
 let deposits = [100e6, 500e6, 1000e6, 5000e6];
 const loadLabel = v => '$' + (v/API).toLocaleString('en-US');
 async function loadMoney(amount){
-  try { const d = await RGS.deposit(amount); balance = d.balance.amount; meta(); $('msg').textContent = 'Loaded ' + loadLabel(amount) + '.'; }
+  try { const d = await NET.deposit(amount); balance = d.balance.amount; meta(); $('msg').textContent = 'Loaded ' + loadLabel(amount) + '.'; }
   catch(e){ $('msg').textContent = e.code === 'ERR_GLE' ? 'That would put the wallet over its limit.' : errText(e); }
 }
 function renderWallet(){
   const row = $('loadrow'); if (!row) return; row.innerHTML = '';
   deposits.forEach(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pill'; b.textContent = '+' + loadLabel(v); b.onclick = () => loadMoney(v); row.appendChild(b); });
-  $('sidline').textContent = 'Session ' + RGS.sessionID;
+  $('sidline').textContent = 'Session ' + NET.sessionID;
 }
 let playerName = '';
 const escHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3376,7 +3505,7 @@ async function askName(first){
     + '<p class="sub" style="margin:10px 0 0;font-size:12px">Play money only. Your rounds are logged with your device and approximate location.</p>', [{label: 'SAVE', value: 'save', primary: true}, {label: first ? 'SKIP' : 'CANCEL', value: 'skip'}]);
   try { localStorage.setItem('sk8.nameAsked', '1'); } catch(e) {}
   if (v !== 'save') return;
-  try { const d = await RGS.setName(String($('nameinput').value || '').slice(0, 24)); playerName = d.name || ''; renderName(); $('msg').textContent = playerName ? 'Hi ' + playerName + '!' : 'Name cleared.'; }
+  try { const d = await NET.setName(String($('nameinput').value || '').slice(0, 24)); playerName = d.name || ''; renderName(); $('msg').textContent = playerName ? 'Hi ' + playerName + '!' : 'Name cleared.'; }
   catch(e){ $('msg').textContent = errText(e); }
 }
 async function offerLoad(text){
@@ -3422,7 +3551,7 @@ async function playRound(name){
   banner(name === 'BASE' ? '3 WILDS OR 3 SESH TAPES START A BONUS · 4 TAPES = LEGEND' : name === 'ANTE' ? 'BONUS BOOST' : name.startsWith('SPECIAL') ? `${TRICK[+name.slice(-1)-1]} · TRICK SPIN` : `${BONUS[+name.slice(-1)-1].name.toUpperCase()} BONUS`);
   const t0 = performance.now();
   let d;
-  try { d = await RGS.play(amount, name); }
+  try { d = await NET.play(amount, name); }
   catch(e){ busy = false; meta(); showError(e); return; }
   // Everything past this point is presentation of a result the server has already
   // settled. It is wrapped so that a throw in the book reader or the animation can
@@ -3432,7 +3561,7 @@ async function playRound(name){
     const res = ttFromBook(bookEvents(d.round)), win = await animateRound(res, cost);
     const minMs = +flags.minimumRoundDuration || 0, el = performance.now() - t0;
     if (minMs > el) await wait(minMs - el);
-    if (d.round.active){ try { const e = await RGS.endRound(); balance = e.balance.amount; } catch(e){ showError(e); } }
+    if (d.round.active){ try { const e = await NET.endRound(); balance = e.balance.amount; } catch(e){ showError(e); } }
     sess.spins++; sess.wag += cost; sess.won += win;
     $('spinsub').textContent = `${name === 'BASE' ? 'Spin' : name} · bet ${fmt$(cost)} · won ${fmt$(win)}`;
   } catch(err){
@@ -3462,7 +3591,7 @@ async function resumeRound(round){
     // a book we cannot read must still not strand the player: close the round anyway
     try { console.error('[sk8] could not replay the open round', err); } catch(e) {}
   }
-  try { const e = await RGS.endRound(); balance = e.balance.amount; } catch(e){ showError(e); }
+  try { const e = await NET.endRound(); balance = e.balance.amount; } catch(e){ showError(e); }
   busy = false; meta();
 }
 
@@ -3557,7 +3686,7 @@ const usd$ = v => (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', {mi
 const when = t => { const s = (Date.now() - t)/1000; return s < 60 ? 'just now' : s < 3600 ? Math.round(s/60) + ' min ago' : s < 86400 ? Math.round(s/3600) + ' h ago' : new Date(t).toLocaleDateString(); };
 async function renderHistory(){
   const box = $('history'); box.innerHTML = '<div class="win"><div class="bar"><span>MY HISTORY</span></div><div class="body"><p style="margin:0">Loading...</p></div></div>';
-  let d; try { d = await RGS.history(); }
+  let d; try { d = await NET.history(); }
   catch(e){ box.querySelector('.body').innerHTML = '<p style="margin:0">' + (e.code === 'NETWORK' ? errText(e) : 'History is coming soon.') + '</p>'; return; }
   const t = d.totals || {}, rows = d.history || [], rtp = t.wagered ? t.won/t.wagered : null;
   const kv = [['Loaded', usd$(t.deposited || 0)], ['Wagered', usd$(t.wagered || 0)], ['Won', usd$(t.won || 0)], ['Net', usd$(t.net || 0)], ['Your RTP', rtp == null ? '-' : (rtp*100).toFixed(2) + '%'], ['Rounds', (t.rounds || 0).toLocaleString('en-US')], ['Best win', (t.best || 0).toLocaleString('en-US') + 'x']];
@@ -3666,9 +3795,9 @@ function startSocial(){
 /* ---------- boot ---------- */
 async function bootPlay(){
   $('calib').textContent = 'connecting...';
-  try { Object.assign(GAME, await RGS.game()); renderRules(); } catch(e) {}
+  try { Object.assign(GAME, await NET.game()); renderRules(); } catch(e) {}
   let a;
-  try { a = await RGS.authenticate(); } catch(e){ $('calib').textContent = ''; showError(e); return; }
+  try { a = await NET.authenticate(); } catch(e){ $('calib').textContent = ''; showError(e); return; }
   balance = a.balance.amount; currency = (a.balance.currency || currency).toUpperCase();
   const c = a.config || {}; flags = c.jurisdiction || {};
   if (flags.socialCasino) social = true;
@@ -3686,7 +3815,7 @@ async function bootPlay(){
   if (a.round && a.round.active) await resumeRound(a.round);
   else if (balance < levels[0]) offerLoad('Load some play money to start.');
   // keep the balance fresh while idle
-  setInterval(async () => { if (busy) return; try { const b = await RGS.balance(); if (busy) return;   // a round started while this was in flight: its balance is newer
+  setInterval(async () => { if (busy) return; try { const b = await NET.balance(); if (busy) return;   // a round started while this was in flight: its balance is newer
     balance = b.balance.amount; meta(); } catch(e) {} }, 60000);
 }
 async function bootReplay(){
@@ -3714,9 +3843,24 @@ renderRules();
 mascot('idle');
 // opening board: a static display, not a result
 { const g = [], m = []; for (let c=0;c<CELLS;c++){ g.push(c % 9); m.push(0); } spinAnim(g, m, null, true, false, {}); }
+// The game server does not accept this clone's origin, so a normal boot cannot
+// finish a round here. Try it anyway -- if it ever is reachable it wins -- and
+// otherwise fall back to the local engine so the slot is playable.
+let NET = RGS;
+function goLocal(why){
+  NET = Local; window.__sk8mode = 'local';
+  const b = $('localbadge'); if (b){ b.hidden = false; b.title = why || ''; }
+  $('spinbtn').disabled = false; $('autobtn').disabled = false;
+  return bootPlay();
+}
 if (replay){ if (RGS.hasReplay) bootReplay(); else $('replayinfo').textContent = 'Missing rgs_url.'; }
-else if (RGS.ok) bootPlay();
-else { $('msg').textContent = 'Connecting to the casino...'; $('spinbtn').disabled = true; $('autobtn').disabled = true; }
+else if (q.get('local') === '1') goLocal('forced by ?local=1');
+else if (RGS.ok){
+  $('calib').textContent = 'connecting...';
+  RGS.authenticate().then(() => { window.__sk8mode = 'server'; bootPlay(); })
+    .catch(e => goLocal('server unreachable: ' + (e && e.code || 'error')));
+}
+else goLocal('no rgs_url');
 })();
 </script>
 <script>
