@@ -959,10 +959,13 @@ def build(night=False, sky=True):
         c.set(bx + 1, by + 2, hx(col), .5)
 
     # floodlight towers rising behind the fence
+    # The towers stand BEHIND the back wall, so the pole stops at the wall
+    # top -- it used to run on down to the floor, straight through the SK8
+    # and OZ pieces.
     for lx in (34, 286):
-        c.rect(lx - 1, 34, 3, 84, ink)
-        c.rect(lx - 1, 34, 2, 84, hx('#4d4858') if night else hx('#8e8a93'))
-        for ry in range(44, 112, 10):          # lattice cross-bracing
+        c.rect(lx - 1, 34, 3, wall_top - 34, ink)
+        c.rect(lx - 1, 34, 2, wall_top - 34, hx('#4d4858') if night else hx('#8e8a93'))
+        for ry in range(44, 88, 10):           # lattice cross-bracing
             c.line((lx - 1, ry), (lx + 2, ry + 10), hx('#6f6a7a'), 1, .7)
             c.line((lx + 2, ry), (lx - 1, ry + 10), hx('#6f6a7a'), 1, .7)
         c.rect(lx - 9, 26, 19, 9, ink)
