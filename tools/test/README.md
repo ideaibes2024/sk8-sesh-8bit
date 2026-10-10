@@ -16,6 +16,7 @@ node tools/test/mock-rgs.js "$PWD" 8787 &
 node tools/test/drive.js               # spins, wins, double-click, malformed book
 node tools/test/drive2.js              # autoplay STOP, tab switch mid-round
 node tools/test/drive3.js 8787         # all six bonus paths
+node tools/test/drive4.js 8787         # win tiers, themed messages, particles
 node tools/test/sheet.js out.png       # symbol + pose contact sheet
 node tools/test/shot.js out.png 8787   # screenshot of a winning board
 ```

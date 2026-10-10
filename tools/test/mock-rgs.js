@@ -41,7 +41,7 @@ function bookBadBonus(){
           {type:'finalWin', amount: 0}];
 }
 const BONUS = require('/tmp/claude-0/sk8test/bonus-books.js');
-const SCEN = Object.assign({lose: bookLose, win3: () => bookWin(3, 50), win5: () => bookWin(5, 1500), bad: bookBadBonus}, BONUS);
+const SCEN = Object.assign({lose: bookLose, win3: () => bookWin(3, 50), win5: () => bookWin(5, 1500), w150: () => bookWin(3, 150), w300: () => bookWin(3, 300), w700: () => bookWin(4, 700), bad: bookBadBonus}, BONUS);
 
 function send(res, code, obj){ const b = JSON.stringify(obj); res.writeHead(code, {'Content-Type':'application/json','Content-Length':Buffer.byteLength(b)}); res.end(b); }
 function body(req){ return new Promise(r => { let d=''; req.on('data',c=>d+=c); req.on('end',()=>{ try{r(JSON.parse(d||'{}'))}catch(e){r({})} }); }); }
