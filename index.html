@@ -3347,6 +3347,9 @@ async function playRound(name){
     try { console.error('[sk8] round presentation failed', err); } catch(e) {}
     showError(err && err.code ? err : {code: 'ERR_GEN'});
   } finally {
+    // a throw mid-spin would otherwise leave a reel clipped and its cells hidden
+    reelEls.forEach(el => el.classList.remove('rolling'));
+    cells.forEach(c => c.classList.remove('spinning'));
     busy = false; meta();
   }
   if (autoLeft > 0 && UI_MODES.some(m => m.id === name)){
