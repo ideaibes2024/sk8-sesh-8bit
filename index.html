@@ -728,13 +728,63 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 })();
 
 </script>
+<style>
+/* Cohesive pixel chrome: opaque reel backing, restrained scenery, clear controls. */
+.scene::after{content:"";position:absolute;inset:0;background:rgba(10,14,30,.14);pointer-events:none}
+.machine .stage{background:#151c30;border-color:#080d18;border-radius:0;box-shadow:0 0 0 2px #60758d,6px 8px 0 #080d18}
+.machine .stage.bonus{background:#271838;border-color:#cf8df7}
+.stagetop .banner{background:#202d42;color:#e3eafa;border:0;border-bottom:2px solid #41536d;font-family:var(--f-n);font-size:clamp(14px,1.7vw,20px);letter-spacing:.02em;padding:7px 4px;line-height:1.2}
+.grid .c,.grid .c.hit,.reel.tease,.celebrate,.winarea,.pill,.round,.iconbtn,.spin,.sidebuy{border-radius:0}
+.gridbox{--gap:8px}
+.grid .c.tape{filter:none;animation:none}
+.spin{background:#ed3d98;border-color:#100e22;box-shadow:4px 5px 0 #100e22;text-shadow:2px 2px #100e22}
+.sidebuy{background:#f6c94a;border-color:#100e22;box-shadow:4px 5px 0 #100e22;font-size:11px}
+.ctrlbar{background:#111929;border-top:2px solid #465873}
+.pill,.round,.iconbtn{background:#26364e;border-color:#0b1120}
+.pill.on{background:#c3ed72;color:#102018}
+.winarea{background:#111929;border:2px solid #465873;box-shadow:3px 3px #080d18}
+#localbadge{position:static;max-width:none;white-space:nowrap;font-family:var(--f-n);font-size:15px;border:1px solid #63788e;border-radius:0;background:#152036;padding:3px 8px;color:#f6d76c;pointer-events:auto}
+.demo .barspacer{display:block;width:auto}
+.soundbtns .pill{font-family:var(--f-n);font-size:16px;padding:6px 9px}
+@media (min-width:701px) and (min-height:561px){
+  .machine .stage{width:min(65vw,calc((100dvh - 340px)*1.18),820px)}
+  .ctrlbar{justify-content:center;gap:12px 24px}
+  .ctrlbar .iconbtn{margin-right:0}
+  .spin{width:280px;height:56px;font-size:17px}
+  .winarea .k{font-size:9px}
+  .machine{gap:9px}
+}
+@media (max-width:700px) and (min-height:561px){
+  .slotbar{flex-wrap:wrap;justify-content:center;padding:8px;gap:7px 12px}
+  .brand{order:-1;flex-basis:100%;text-align:center}
+  .soundbtns .pill{font-size:14px;padding:5px 8px}
+  #localbadge{font-size:13px}
+  .machine .stage{width:min(94vw,calc((100dvh - 350px)*1.2));padding:7px}
+  .stagetop .banner{font-size:14px;line-height:1.15}
+  .gridbox{--gap:5px}
+  .spin{height:48px;width:min(260px,84vw)}
+  .winarea .k{font-size:8px}
+}
+@media (max-width:720px) and (max-height:560px) and (orientation:portrait){.machine .stage{width:min(94vw,calc((100dvh - 295px)*1.2))}}
+@media (max-width:700px) and (max-height:560px){.demo .slotbar{flex-wrap:wrap;justify-content:center;gap:4px}.demo .barspacer{order:2}.demo #localbadge{font-size:11px;padding:1px 5px}.demo .soundbtns .pill{font-size:12px;padding:3px 5px}}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none!important}.gridbox .grid,.celebrate *{animation:none!important}}
+</style>
+<style>
+/* Static skatepark theme: no riders, sky cycle, moving clouds or animated lights. */
+.scene,.scene *{animation:none!important;transition:none!important}
+.scene .sky{background:linear-gradient(#5bbdf7,#a9e2ff 55%,#eaf8ff)!important}
+.scene #sun{opacity:1;transform:none;filter:none}
+.scene #clouds1{opacity:.95;filter:none!important;background-position:0 0}
+.scene #clouds2{opacity:.6;filter:none!important;background-position:140px 0}
+.slot .scene .park{background-image:url("park-day.svg")!important;filter:none!important}
+</style>
 </head>
 <body>
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
-    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="orb" id="moon"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div><div class="citylights"></div><div class="sklayer" id="fxlayer"><div class="signalbeam"></div><div class="signaldisc"></div><div class="lampbar" id="barL"></div><div class="lampbar" id="barR"></div><div class="lookout" id="lookoutGlide"><i></i></div><div class="lookout" id="lookoutPerch"><i></i></div></div><div class="sklayer" id="sklayer"><div id="skRamp"><i></i></div><div class="sk" id="skRail"></div><div class="sk" id="skIdle"></div></div></div>
+    <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div></div>
     <header class="slotbar">
-      <span class="barspacer" aria-hidden="true"></span>
+      <span class="barspacer"><span id="localbadge" hidden title="Free browser demo. Outcomes are generated on this device; play money has no cash value.">FREE DEMO &middot; PLAY MONEY</span></span>
       <div class="brand">SK8 SESH</div>
       <div class="soundbtns"><button class="pill" id="musicbtn" type="button" aria-pressed="false">MUSIC: OFF</button><button class="pill" id="soundbtn" type="button" aria-pressed="false">SFX: OFF</button></div>
     </header>
@@ -743,7 +793,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       <div class="stagewrap">
       <button class="sidebuy" id="buybtn" type="button">BONUS <br>BUY</button>
       <div class="stage" id="stage">
-        <div class="stagetop"><div class="mascot" id="mascot" aria-hidden="true"></div><div class="banner" id="banner">3 WILDS OR 3 SESH TAPES START A BONUS · 4 TAPES = LEGEND</div></div>
+        <div class="stagetop"><div class="mascot" id="mascot" aria-hidden="true"></div><div class="banner" id="banner">3 WILDS = CREW · 3 TAPES = SESH · 4+ TAPES = LEGEND</div></div>
         <div class="gridbox">
           <div class="grid" id="grid"></div>
           <svg class="overlay" id="lineov" viewBox="0 0 500 400" preserveAspectRatio="none" aria-hidden="true"></svg>
@@ -752,7 +802,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
         </div>
       </div>
       </div>
-      <div class="winrow"><div class="winarea" aria-live="polite"><span class="k">LAST WIN</span><span class="v" id="lastwin">-</span></div><div class="winarea total" id="totalbox" hidden><span class="k">TOTAL WIN</span><span class="v" id="totalwin">-</span></div></div>
+      <div class="winrow"><div class="winarea" aria-live="polite"><span class="k">LAST WIN</span><span class="v" id="lastwin">-</span></div><div class="winarea total" id="totalbox" hidden><span class="k">BONUS TOTAL</span><span class="v" id="totalwin">-</span></div></div>
       <div class="spinwrap"><button class="spin" id="spinbtn" type="button">SPIN</button></div>
       <div class="replaybar" id="replaybar" hidden>
         <button class="spin" id="replaybtn" type="button" disabled>LOADING</button>
@@ -763,7 +813,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     <footer class="ctrlbar">
       <button class="iconbtn" id="menubtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>
       <div class="ctl balctl"><span class="k">BALANCE</span><b id="balance">-</b></div>
-      <div class="ctl betctl"><span class="k">BET</span><div class="betrow"><button class="round" id="betminus" type="button" aria-label="Lower bet">&minus;</button><b id="cost">-</b><button class="round" id="betplus" type="button" aria-label="Raise bet">+</button></div></div>
+      <div class="ctl betctl"><span class="k">SPIN COST</span><div class="betrow"><button class="round" id="betminus" type="button" aria-label="Lower bet">&minus;</button><b id="cost">-</b><button class="round" id="betplus" type="button" aria-label="Raise bet">+</button></div></div>
       <div class="ctl tools"><button class="pill" id="autobtn" type="button">AUTOPLAY</button><button class="pill" id="speedbtn" type="button">SPEED: NORMAL</button><button class="pill" id="modebtn" type="button">MODE: NORMAL</button></div>
     </footer>
     <select id="bet" hidden aria-hidden="true"></select>
@@ -788,7 +838,7 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
         <h3 class="dh">WALLET</h3>
         <p class="sub" style="margin:0 0 6px">Play money only. Load as much as you like.</p>
         <p class="sub" style="margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span id="nameline"></span><button class="pill" id="namebtn" type="button">CHANGE NAME</button></p>
-        <p class="sub" style="margin:0 0 8px;font-size:11px;opacity:.75">Play money only. Your rounds are logged with your device and approximate location.</p>
+        <p class="sub" id="storageinfo" style="margin:0 0 8px;font-size:11px;opacity:.75"></p>
         <div id="loadrow" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         <p class="sub" id="sidline" style="margin:8px 0 0;font-size:11px;opacity:.7"></p>
         <h3 class="dh">THIS SPIN</h3>
@@ -796,7 +846,6 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
         <p class="sub" id="calib" style="margin-top:12px"></p>
       </div></div>
   </aside>
-  <div id="localbadge" hidden title="">DEMO &middot; outcomes generated in your browser, play money only</div>
   <div class="modal" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="cf-t">
     <div class="win"><div class="bar"><span id="cf-t">CONFIRM</span></div>
       <div class="body">
@@ -1259,6 +1308,54 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
     poses: POSES.slice(),
     tileColor: function (id) { return TILE[id] || null; }
   };
+})();
+
+/* Reel symbols share a 32px grid with the skatepark. No smoothing or external images. */
+(function () {
+  const colors = {cassette:'#8398ad',sneaker:'#baa887',spray:'#91b29a',lighter:'#ac93ac',cap:'#b5a0ce',wheels:'#58b6df',trucks:'#a68cd9',face:'#a9d65b',board:'#e5bc4d',wild:'#7554c4',scatter:'#e757a6',legend:'#b579ed'};
+  const ink = '#121b2a', white = '#fff3d6';
+  const rect = (x,y,w,h,c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+  const path = (d,c) => `<path d="${d}" fill="${c}"/>`;
+  const text = (x,y,t,c=white,size=6) => `<text x="${x}" y="${y}" text-anchor="middle" fill="${c}" font-family="VT323,monospace" font-size="${size}">${t}</text>`;
+  const wheels = (x,y) => rect(x,y,5,5,ink)+rect(x+1,y+1,3,3,white);
+  const cache = new Map();
+  function symbol(id,o={}) {
+    const key = `${id}:${o.mult||0}:${!!o.sticky}:${!!o.dim}`;
+    if(cache.has(key)) return cache.get(key);
+    const c=colors[id]||colors.scatter;
+    let a=rect(1,1,30,30,ink)+rect(2,2,28,27,c)+rect(3,3,26,1,white)+rect(3,29,26,1,ink);
+    if(id==='cassette') {
+      a+=rect(5,8,22,16,ink)+rect(6,9,20,14,'#384659')+rect(7,10,18,5,white)+text(16,14,'MIX',ink,5)+rect(8,17,16,4,ink)+wheels(9,17)+wheels(19,17);
+    } else if(id==='scatter'||id==='legend') {
+      a+=path('M16 3L19 7H26V12L30 16L26 20V26H20L16 30L12 26H6V20L2 16L6 12V6H12Z','#ffe16b');
+      a+=rect(5,9,22,16,ink)+rect(6,10,20,14,'#6c224f')+rect(7,11,18,6,white)+text(16,16,id==='legend'?'LEGEND':'SESH',ink,id==='legend'?5:7)+wheels(9,19)+wheels(19,19);
+    } else if(id==='sneaker') {
+      a+=path('M6 7H14V11H18V14H23V17H27V25H5V11H6Z',ink)+path('M7 9H12V13H16V16H22V19H25V21H7Z','#d95d43')+rect(5,22,22,2,white)+rect(10,14,6,2,white)+rect(13,17,6,2,white);
+    } else if(id==='spray') {
+      a+=rect(13,5,6,3,ink)+rect(11,8,10,3,ink)+rect(9,11,14,16,ink)+rect(11,11,10,14,'#57b8d1')+rect(11,15,10,8,white)+rect(13,17,6,4,'#ea4c98')+rect(13,6,3,2,white)+rect(24,7,2,2,'#ea4c98')+rect(27,5,2,2,'#ea4c98');
+    } else if(id==='lighter') {
+      a+=path('M16 3H18V7H20V12H13V8H15Z',ink)+rect(16,6,2,5,'#f8b947')+rect(11,12,11,15,ink)+rect(13,17,7,8,'#93cc42')+rect(12,13,9,3,'#b9c8d0')+rect(17,19,2,4,white);
+    } else if(id==='cap') {
+      a+=path('M11 8H20V10H24V14H26V21H29V24H5V21H4V16H6V12H9V10H11Z',ink)+path('M12 10H19V12H22V15H24V20H7V16H9V13H12Z','#426bd5')+rect(16,10,2,10,'#9ba8f5')+rect(14,21,13,1,white)+rect(14,8,4,2,'#e66da4');
+    } else if(id==='wheels') {
+      for(const [x,y] of [[6,6],[18,6],[12,18]]) a+=rect(x,y,9,9,ink)+rect(x+1,y+1,7,7,white)+rect(x+3,y+3,3,3,'#5b7a9e')+rect(x+4,y+4,1,1,ink);
+    } else if(id==='trucks') {
+      for(const y of [7,20]) a+=rect(5,y,22,4,ink)+rect(7,y+1,18,2,'#ccd9e2')+rect(13,y-2,6,2,ink)+rect(13,y+4,6,2,ink)+rect(14,y+4,4,1,'#ccd9e2');
+      a+=rect(15,12,2,6,ink);
+    } else if(id==='face') {
+      a+=rect(9,12,14,12,ink)+rect(11,14,10,8,'#dfad79')+path('M8 13V9H10V6H14V4H18V6H22V9H24V13Z',ink)+rect(10,9,12,3,'#e24f56')+rect(12,7,8,2,'#e24f56')+rect(10,12,14,2,white)+rect(10,15,5,3,ink)+rect(17,15,5,3,ink)+rect(15,16,2,1,ink)+rect(14,21,4,1,ink)+path('M9 24H23V27H26V29H6V27H9Z','#31588e');
+    } else if(id==='board') {
+      a+=path('M22 4H26V6H28V10H26V14H24V18H20V22H16V26H12V28H7V26H5V22H7V18H11V14H15V10H19V6H22Z',ink)+path('M22 6H25V8H26V10H24V14H22V16H18V20H14V24H11V26H8V24H7V22H9V18H13V14H17V10H21V8H22Z','#e55753')+rect(15,13,4,6,'#f8d76b')+rect(12,18,4,3,'#f8d76b')+rect(21,8,3,3,white)+rect(8,22,3,3,white);
+    } else if(id==='wild') {
+      a+=path('M9 5H23V7H25V26H7V7H9Z',ink)+rect(9,8,14,16,'#ead8ac')+rect(11,10,10,8,'#d43e8e')+text(16,17,'W',white,9);
+      if(o.mult>0) a+=rect(4,21,24,8,ink)+text(16,28,'x'+Math.round(o.mult*100)/100,'#ffe16b',o.mult>=1000?5:7);
+      else a+=text(16,25,'WILD',ink,5);
+      if(o.sticky) a+=rect(24,3,5,5,'#bdf06a');
+    }
+    const result=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="${id}${o.mult?' x'+Number(o.mult):''}"${o.dim?' style="opacity:.42;filter:saturate(.15)"':''}>${a}</svg>`;
+    cache.set(key,result); return result;
+  }
+  window.Sk8Art.symbol=symbol;
 })();
 
 /*
@@ -2903,9 +3000,15 @@ const BONUS = [
   {name:'Legend', trig:'4 SESH tapes (5 for 12 spins)', desc:'10 free spins. Every wild on reels 2-4 fills its reel and stays, and new wilds multiply it up.'}];
 const LINE_COLORS = ['#FFE600','#FF3EA5','#3BE3FF','#9BFF3B','#FF8A00','#C77DFF','#FF5D5D','#00F5B4','#FFD6E8','#7AA2FF','#FFB3FF','#B8FF6B','#FFC247','#6BFFE1','#FF9EAA','#E0E0FF'];
 const MODE = name => GAME.modes.find(m => m.name === name);
+const isDemo = () => window.__sk8mode === 'local';
+const roundCap = name => !isDemo() ? MODE(name).maxWin : name === 'SPECIAL3' ? LOCAL_CFG.maxWinTrick : name === 'BONUS2' ? LOCAL_CFG.maxWinSesh : ['BASE','ANTE','BONUS3'].includes(name) ? LOCAL_CFG.maxWinLegend : LOCAL_CFG.maxWin;
+const kickflipInfo = () => isDemo()
+  ? `3 guaranteed wilds on reels 2-4; their reels expand. Several wilds can share a reel. Round cap ${fx(roundCap('SPECIAL3'))}x bet. No bonuses.`
+  : `3 guaranteed wilds that can land on any reel and fill it. Round limit ${fx(roundCap('SPECIAL3'))}x bet. No bonuses.`;
+const storageInfo = () => isDemo() ? 'Demo balance is saved in this browser. No real money or location tracking is used by the local game.' : 'Play money only. Your rounds are logged with your device and approximate location.';
 const UI_MODES = [
   {id:'BASE', label:'NORMAL', sub: () => '1x'},
-  {id:'ANTE', label:'BONUS BOOST', sub: () => `${MODE('ANTE').cost}x · ~${Math.round(MODE('BASE').bonusOneIn/MODE('ANTE').bonusOneIn)}x bonus chance`},
+  {id:'ANTE', label:'BONUS BOOST', sub: () => isDemo() ? `${MODE('ANTE').cost}x · more bonus chances` : `${MODE('ANTE').cost}x · ~${Math.round(MODE('BASE').bonusOneIn/MODE('ANTE').bonusOneIn)}x bonus chance`},
   {id:'SPECIAL1', label:'OLLIE', sub: () => `${MODE('SPECIAL1').cost}x · 1 guaranteed wild`},
   {id:'SPECIAL2', label:'GRIND', sub: () => `${MODE('SPECIAL2').cost}x · 2 guaranteed wilds`},
   {id:'SPECIAL3', label:'KICKFLIP', sub: () => `${MODE('SPECIAL3').cost}x · 3 guaranteed wilds`}];
@@ -2963,7 +3066,7 @@ let legendCache = null;
 function symHTML(s, opts){
   opts = opts || {};
   if (!Art) return `<div class="fb">${SHORT[s]}${opts.mult ? '<br>x'+opts.mult : ''}</div>`;
-  if (s === S2){ if (!legendCache) legendCache = Art.symbol('scatter', {}).replace(/font-size="20"([^>]*)>SESH</g, 'font-size="12"$1>LEGEND<').replace('<svg', '<svg style="filter:hue-rotate(155deg) saturate(1.3)"'); return legendCache; }
+  if (s === S2) return Art.symbol('legend', {dim: opts.dim});
   const id = ['cassette','sneaker','spray','lighter','cap','wheels','trucks','face','board','wild','scatter'][s];
   return Art.symbol(id, s === W ? {mult: opts.mult, sticky: opts.sticky, dim: opts.dim} : {dim: opts.dim});
 }
@@ -3495,6 +3598,7 @@ function renderWallet(){
   const row = $('loadrow'); if (!row) return; row.innerHTML = '';
   deposits.forEach(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pill'; b.textContent = '+' + loadLabel(v); b.onclick = () => loadMoney(v); row.appendChild(b); });
   $('sidline').textContent = 'Session ' + NET.sessionID;
+  $('storageinfo').textContent = storageInfo();
 }
 let playerName = '';
 const escHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3502,7 +3606,7 @@ function renderName(){ const n = $('nameline'); if (n) n.textContent = playerNam
 async function askName(first){
   const v = await modal(first ? 'WHO IS PLAYING?' : 'PLAYER NAME', '<p style="margin:0 0 10px">Pick a name so your play is easy to find. It is optional.</p>'
     + '<input id="nameinput" class="in" maxlength="24" autocomplete="nickname" placeholder="Your name" value="' + escHTML(playerName) + '" style="width:100%;font-size:16px;padding:8px">'
-    + '<p class="sub" style="margin:10px 0 0;font-size:12px">Play money only. Your rounds are logged with your device and approximate location.</p>', [{label: 'SAVE', value: 'save', primary: true}, {label: first ? 'SKIP' : 'CANCEL', value: 'skip'}]);
+    + '<p class="sub" style="margin:10px 0 0;font-size:12px">' + storageInfo() + '</p>', [{label: 'SAVE', value: 'save', primary: true}, {label: first ? 'SKIP' : 'CANCEL', value: 'skip'}]);
   try { localStorage.setItem('sk8.nameAsked', '1'); } catch(e) {}
   if (v !== 'save') return;
   try { const d = await NET.setName(String($('nameinput').value || '').slice(0, 24)); playerName = d.name || ''; renderName(); $('msg').textContent = playerName ? 'Hi ' + playerName + '!' : 'Name cleared.'; }
@@ -3548,7 +3652,7 @@ async function playRound(name){
   if (autoTimer){ clearTimeout(autoTimer); autoTimer = 0; }
   if (balance < amount*costOf(name)){ stopAuto(); $('msg').textContent = ERRORS.ERR_IPB; meta(); return; }
   busy = true; roundBet = amount/API; $('msg').textContent = ''; clearStacks(); resetWinBoxes(); meta();
-  banner(name === 'BASE' ? '3 WILDS OR 3 SESH TAPES START A BONUS · 4 TAPES = LEGEND' : name === 'ANTE' ? 'BONUS BOOST' : name.startsWith('SPECIAL') ? `${TRICK[+name.slice(-1)-1]} · TRICK SPIN` : `${BONUS[+name.slice(-1)-1].name.toUpperCase()} BONUS`);
+  banner(name === 'BASE' ? '3 WILDS = CREW · 3 TAPES = SESH · 4+ TAPES = LEGEND' : name === 'ANTE' ? 'BONUS BOOST' : name.startsWith('SPECIAL') ? `${TRICK[+name.slice(-1)-1]} · TRICK SPIN` : `${BONUS[+name.slice(-1)-1].name.toUpperCase()} BONUS`);
   const t0 = performance.now();
   let d;
   try { d = await NET.play(amount, name); }
@@ -3607,10 +3711,10 @@ function renderModes(){
 }
 /* confirmations: price, a bet changer, and the bonus odds for Bonus Boost */
 let cfState = null;
-const MODE_INFO = {ANTE: () => `Bonus Boost: every spin costs ${costOf('ANTE')}x your bet and starts a bonus about ${(MODE('BASE').bonusOneIn/MODE('ANTE').bonusOneIn).toFixed(1)} times as often.`,
+const MODE_INFO = {ANTE: () => isDemo() ? `Bonus Boost: every spin costs ${costOf('ANTE')}x your base bet and increases the chance of a bonus. Demo frequency is not certified.` : `Bonus Boost: every spin costs ${costOf('ANTE')}x your bet and starts a bonus about ${(MODE('BASE').bonusOneIn/MODE('ANTE').bonusOneIn).toFixed(1)} times as often.`,
   SPECIAL1: () => `OLLIE: costs ${costOf('SPECIAL1')}x your bet. 1 guaranteed wild on reels 2-4 that fills its reel. No bonuses.`,
   SPECIAL2: () => `GRIND: costs ${costOf('SPECIAL2')}x your bet. 2 guaranteed wilds on reels 2-4 that fill their reels. No bonuses.`,
-  SPECIAL3: () => `KICKFLIP: costs ${costOf('SPECIAL3')}x your bet. 3 guaranteed wilds that can land on any reel and fill it. Super rare: all 5 reels go wild for up to 20,000x. No bonuses.`};
+  SPECIAL3: () => `KICKFLIP: costs ${costOf('SPECIAL3')}x your bet. ${kickflipInfo()}`};
 const pctOf = n => (100/n < 1 ? (100/n).toFixed(2) : (100/n).toFixed(1)) + '%';
 function cfRender(){
   const s = cfState; if (!s) return;
@@ -3618,7 +3722,7 @@ function cfRender(){
   $('cf-t').textContent = s.kind === 'buy' ? `BUY ${BONUS[t].name.toUpperCase()}` : (m ? m.label : 'CONFIRM');
   $('cf-desc').textContent = s.kind === 'buy' ? `${BONUS[t].desc} ${costOf(s.name)}x your bet.` : MODE_INFO[s.name]();
   const a = MODE('ANTE').bonusOneIn, n = MODE('BASE').bonusOneIn;
-  const odds = s.name === 'ANTE' ? `CHANCE OF A BONUS EACH SPIN: 1 IN ${a.toLocaleString('en-US')} (${pctOf(a)})` : '';
+  const odds = s.name === 'ANTE' ? isDemo() ? 'DEMO BONUS FREQUENCY IS NOT CERTIFIED' : `CHANCE OF A BONUS EACH SPIN: 1 IN ${a.toLocaleString('en-US')} (${pctOf(a)})` : '';
   $('cf-odds').hidden = !odds; $('cf-odds').textContent = odds;
   $('cf-bet').textContent = fmtBal(levels[betIdx]); $('cf-pk').textContent = s.kind === 'buy' ? 'PRICE' : 'COST PER SPIN'; $('cf-price').textContent = fmtBal(price);
   $('cf-minus').disabled = betIdx <= 0; $('cf-plus').disabled = betIdx >= levels.length-1;
@@ -3652,7 +3756,7 @@ function meta(){
 }
 function renderJuris(){
   const bits = [];
-  if (flags.displayRTP) bits.push(`RTP ${pct(MODE(mode).rtp)}`);
+  if (flags.displayRTP && !isDemo()) bits.push(`RTP ${pct(MODE(mode).rtp)}`);
   if (flags.displayNetPosition){ const net = sess.won - sess.wag; bits.push(`NET ${net >= 0 ? '+' : ''}${fmt$(net)}`); }
   if (flags.displaySessionTimer){ const s = Math.floor((Date.now()-sess.t0)/1000); bits.push(`SESSION ${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`); }
   $('juris').textContent = bits.join('   ');
@@ -3692,13 +3796,13 @@ async function renderHistory(){
   const kv = [['Loaded', usd$(t.deposited || 0)], ['Wagered', usd$(t.wagered || 0)], ['Won', usd$(t.won || 0)], ['Net', usd$(t.net || 0)], ['Your RTP', rtp == null ? '-' : (rtp*100).toFixed(2) + '%'], ['Rounds', (t.rounds || 0).toLocaleString('en-US')], ['Best win', (t.best || 0).toLocaleString('en-US') + 'x']];
   const label = r => r.type === 'deposit' ? 'Loaded money' : (MODE(r.mode) ? MODE(r.mode).label : r.mode);
   box.innerHTML = '<div class="win"><div class="bar"><span>MY HISTORY</span></div><div class="body">'
-    + '<p style="margin:0 0 10px">Every round is decided on the game server and logged under this browser\'s session. The game returns 96.01% on average; your own RTP swings a lot over a few hundred spins.</p>'
+    + '<p style="margin:0 0 10px">' + (isDemo() ? 'Demo rounds are generated in your browser. Round history is not recorded in this demo; only the balance is saved. Demo RTP is not certified.' : 'Rounds are settled and recorded by the game server. Session return varies and does not predict future results.') + '</p>'
     + '<table><tbody>' + kv.map(([k, v]) => '<tr><th>' + k + '</th><td style="text-align:right">' + v + '</td></tr>').join('') + '</tbody></table></div></div>'
     + '<div class="win"><div class="bar"><span>LATEST ' + rows.length + '</span></div><div class="body" style="overflow-x:auto">'
     + (rows.length ? '<table><thead><tr><th>When</th><th>What</th><th style="text-align:right">Cost</th><th style="text-align:right">Win</th><th style="text-align:right">x bet</th><th style="text-align:right">Balance</th></tr></thead><tbody>'
       + rows.map(r => '<tr><td>' + when(r.t) + '</td><td>' + label(r) + '</td><td style="text-align:right">' + (r.type === 'deposit' ? '+' + usd$(r.amount) : usd$(r.cost)) + '</td><td style="text-align:right">' + (r.type === 'deposit' ? '' : usd$(r.win)) + '</td><td style="text-align:right">' + (r.type === 'deposit' ? '' : (r.mult || 0).toLocaleString('en-US') + 'x') + '</td><td style="text-align:right">' + usd$(r.bal) + '</td></tr>').join('')
       + '</tbody></table>' : '<p style="margin:0">No rounds yet.</p>')
-    + '<p class="sub" style="margin:10px 0 0">Session ' + RGS.sessionID + '</p></div></div>';
+    + '<p class="sub" style="margin:10px 0 0">Session ' + NET.sessionID + '</p></div></div>';
 }
 function showTab(name){
   TABS.forEach(t => { $('tab-'+t).hidden = t !== name; $('t-'+t).setAttribute('aria-selected', t === name); });
@@ -3731,10 +3835,10 @@ function slotChrome(){
 /* ---------- rules ---------- */
 function renderRules(){
   const ico = (s, mult) => `<span class="ico">${symHTML(s, s === W ? {mult: mult || 5} : {})}</span>`;
-  const modeRows = GAME.modes.map(m => { const what = {BASE: 'Normal spin.', ANTE: `Bonus Boost: each spin has a 1 in ${MODE('ANTE').bonusOneIn.toLocaleString('en-US')} chance to start a bonus, instead of 1 in ${MODE('BASE').bonusOneIn.toLocaleString('en-US')}. Every spin is independent.`, SPECIAL1: 'Trick Spin: 1 guaranteed wild on reels 2-4 that fills its reel. No bonuses.',
-      SPECIAL2: 'Trick Spin: 2 guaranteed wilds on reels 2-4 that fill their reels. No bonuses.', SPECIAL3: 'Trick Spin: 3 guaranteed wilds that can land on any reel and fill it. About 1 in 50,000: all 5 reels go wild, up to 20,000x. No bonuses.',
+  const modeRows = GAME.modes.map(m => { const what = {BASE: 'Normal spin.', ANTE: isDemo() ? 'Costs 2.5x bet and increases the chance of a bonus. Demo bonus frequency is estimated, not certified.' : `Bonus Boost: each spin has a 1 in ${MODE('ANTE').bonusOneIn.toLocaleString('en-US')} chance to start a bonus, instead of 1 in ${MODE('BASE').bonusOneIn.toLocaleString('en-US')}. Every spin is independent.`, SPECIAL1: 'Trick Spin: 1 guaranteed wild on reels 2-4 that fills its reel. No bonuses.',
+      SPECIAL2: 'Trick Spin: 2 guaranteed wilds on reels 2-4 that fill their reels. No bonuses.', SPECIAL3: kickflipInfo(),
       BONUS1: 'Buys the Crew bonus.', BONUS2: 'Buys the Sesh bonus.', BONUS3: 'Buys the Legend bonus.'}[m.name];
-    return `<tr><td>${m.label}</td><td>${m.cost}x bet</td><td>${what}</td><td>${pct(m.rtp)}</td><td>${fx(m.maxWin)}x bet</td></tr>`; }).join('');
+    return `<tr><td>${m.label}</td><td>${m.cost}x bet</td><td>${what}</td><td>${isDemo() ? 'Not certified' : pct(m.rtp)}</td><td>${fx(roundCap(m.name))}x bet</td></tr>`; }).join('');
   const pays = [0,1,2,3,4,5,6,7,8].map(s => `<tr><td>${ico(s)}${NAMES[s]}</td>${[0,1,2].map(k => `<td>${fx(GAME.pays[s][k])}x</td>`).join('')}</tr>`).join('');
   const lineSvg = (ln, i) => `<figure><svg viewBox="0 0 50 40" aria-hidden="true">${[0,1,2,3,4].map(r => [0,1,2,3].map(row => `<rect x="${r*10+1}" y="${row*10+1}" width="8" height="8" rx="1.5" fill="${ln[r]===row ? LINE_COLORS[i] : 'none'}" stroke="currentColor" stroke-opacity=".35"/>`).join('')).join('')}</svg><figcaption>Line ${i+1}</figcaption></figure>`;
   $('rules').innerHTML = `
@@ -3742,14 +3846,14 @@ function renderRules(){
     <p style="margin-top:0">Pick a bet and spin. The game has 5 reels, 4 rows and 16 fixed lines. Three or more matching symbols on a line, starting from the leftmost reel, win the amount in the paytable times your bet. Only the highest win on each line pays, and wins on different lines add up.</p>
     <p><strong>Wilds</strong> substitute for every paying symbol. In the base game many wilds are plain (no multiplier); the rest carry a multiplier. When wilds help make a line win, their multipliers are added together and the line win is multiplied by that total. Five wilds on a line pay ${fx(GAME.pays[9][2])}x bet times their total multiplier.</p>
     <p>Wild multipliers you can land: ${GAME.multipliers.map(x => 'x' + x).join(', ')}. Blue wilds show x2 to x4, green x5 to x20, purple x25 and up.</p>
-    <p><strong>Full wild reels</strong> (bonuses and Trick Spins): wilds on reels 2, 3 and 4 fill their whole reel. If several wilds land on one reel, their multipliers are multiplied together first. Full wild reels on the same line add their multipliers.</p>
-    <p>Wins are capped at ${fx(GAME.maxWin)}x your bet, except the Sesh bonus, capped at ${fx(GAME.maxWinSesh)}x, and the Legend bonus, capped at ${fx(GAME.maxWinLegend)}x. When a round reaches the cap it ends and pays the cap. The highest win possible in each mode is listed under Game modes.</p>
-    <p><strong>Minimum win:</strong> every bonus (bought or triggered) and every Trick Spin pays at least 10% of its price: Crew ${fx(MODE('BONUS1').cost/10)}x, Sesh ${fx(MODE('BONUS2').cost/10)}x and Legend ${fx(MODE('BONUS3').cost/10)}x your bet, Trick Spins ${fx(MODE('SPECIAL1').cost/10)}x, ${fx(MODE('SPECIAL2').cost/10)}x and ${fx(MODE('SPECIAL3').cost/10)}x. A round that would pay less is played again until it reaches that, so the low end lands anywhere from 10% up rather than on an exact amount.</p>
+    <p><strong>Full wild reels</strong> (Sesh, Legend and Trick Spins): wilds on reels 2, 3 and 4 fill their whole reel. If several wilds land on one reel, their multipliers are multiplied together first. Full wild reels on the same line add their multipliers.</p>
+    <p>Wins are capped at ${fx(GAME.maxWin)}x your bet, except the Sesh bonus, capped at ${fx(GAME.maxWinSesh)}x, and the Legend bonus, capped at ${fx(GAME.maxWinLegend)}x. When a round reaches the cap it ends and pays the cap. Kickflip has a separate ${fx(roundCap('SPECIAL3'))}x limit. The Game modes table distinguishes round caps from attainable wins.</p>
+    <p><strong>Minimum win:</strong> every bonus (bought or triggered) and every Trick Spin pays at least 10% of its price: Crew ${fx(MODE('BONUS1').cost/10)}x, Sesh ${fx(MODE('BONUS2').cost/10)}x and Legend ${fx(MODE('BONUS3').cost/10)}x your bet, Trick Spins ${fx(MODE('SPECIAL1').cost/10)}x, ${fx(MODE('SPECIAL2').cost/10)}x and ${fx(MODE('SPECIAL3').cost/10)}x. ${isDemo() ? 'If the generated round pays less, the demo adds the difference as a clearly displayed minimum-win top-up.' : 'A round that would pay less is played again until it reaches the minimum.'}</p>
   </div></div>
   <div class="win"><div class="bar"><span>BONUSES</span></div><div class="body">
-    <p style="margin-top:0"><strong>Crew</strong>: land 3 or more wilds with multipliers anywhere on a normal spin. 10 free spins. Wilds land often on reels 2-4 (about 1.6 times per spin on average) and always fill the whole reel. Crew wilds carry no multiplier: a line through them pays its normal amount.</p>
+    <p style="margin-top:0"><strong>Crew</strong>: ${isDemo() ? 'land 3 or more wilds, including plain wilds, on a Normal or Bonus Boost spin. 10 free spins. Multiplier wilds stay in their individual positions for the remaining free spins; they do not fill whole reels.' : 'land 3 or more multiplier wilds on a normal spin. 10 free spins. Plain wilds on reels 2-4 expand when they can be part of a win.'}</p>
     <p><strong>Sesh</strong>: land 3 SESH tapes ${ico(10)}. 10 free spins. Wilds land only on reels 2-4, and a wild fills its whole reel when that reel can be part of a win.</p>
-    <p><strong>Legend</strong>: land 4 SESH tapes. 10 free spins, or 12 free spins with 5 tapes. Every wild on reels 2-4 fills its reel and stays for the rest of the bonus. A new wild landing on a filled reel multiplies its multiplier.</p>
+    <p><strong>Legend</strong>: land 4 SESH tapes. 10 free spins, or 12 free spins with 5 tapes. A wild on reels 2-4 expands when it can be part of a win, then stays for the rest of the bonus. A new wild landing on a filled reel multiplies its multiplier.</p>
     <p>SESH tapes appear only on normal and Bonus Boost spins, at most one per reel. If tapes and wilds both trigger on the same spin, the tapes win (Legend beats Sesh beats Crew). Bonuses cannot be retriggered. A bought bonus plays exactly like one won on a spin.</p>
   </div></div>
   <div class="win"><div class="bar"><span>PAYTABLE</span></div><div class="body">
@@ -3758,8 +3862,8 @@ function renderRules(){
   </div></div>
   <div class="win"><div class="bar"><span>LINES</span></div><div class="body"><div class="linesgrid">${TT.LINES.map(lineSvg).join('')}</div></div></div>
   <div class="win"><div class="bar"><span>GAME MODES</span></div><div class="body">
-    <p class="sub">Every mode costs a multiple of your bet. RTP is the theoretical return for that mode, worked out over all possible rounds.</p>
-    <table><thead><tr><th>Mode</th><th>Cost</th><th>What it does</th><th>RTP</th><th>Max win</th></tr></thead><tbody>${modeRows}</tbody></table>
+    <p class="sub">Every mode costs a multiple of your base bet. ${isDemo() ? 'This browser demo has no certified RTP. Its simulated estimates differ by mode; 96.01% is a server target, not a verified demo return. Round caps below are payout limits, not promises that each limit is attainable.' : 'RTP is the long-run theoretical return supplied by the game server. Individual sessions vary. The limits below are supplied by the server.'}</p>
+    <table><thead><tr><th>Mode</th><th>Cost</th><th>What it does</th><th>RTP</th><th>${isDemo() ? 'Round cap' : 'Max win'}</th></tr></thead><tbody>${modeRows}</tbody></table>
   </div></div>
   <div class="win"><div class="bar"><span>BUTTONS</span></div><div class="body"><ul style="margin:0;padding-left:18px">
     <li><strong>Bet</strong>: picks your bet size.</li>
@@ -3770,7 +3874,7 @@ function renderRules(){
     <li><strong>NORMAL / BONUS BOOST / OLLIE / GRIND / KICKFLIP</strong>: choose the mode for the SPIN button.</li>
     <li><strong>BONUS BUY</strong>: buys a bonus straight away, after you confirm.</li>
     <li><strong>Rules</strong>: this page.</li></ul></div></div>
-  <div class="win"><div class="bar"><span>DISCLAIMER</span></div><div class="body"><p style="margin:0">Malfunction voids all wins and plays. A consistent internet connection is required. In the event of a disconnection, reload the game to finish any uncompleted rounds. The expected return is calculated over many plays. The game display is not representative of any physical device and is for illustrative purposes only. Winnings are settled according to the amount received from the Remote Game Server and not from events within the web browser.</p></div></div>`;
+  <div class="win"><div class="bar"><span>DISCLAIMER</span></div><div class="body"><p style="margin:0">${isDemo() ? 'Free browser demo. Outcomes are generated on this device; balances are fictional, saved in this browser, and cannot be withdrawn. No Remote Game Server settles demo rounds. RTP is not certified. Clearing browser storage resets the saved balance. Reloading may interrupt an animation; the balance is saved when the demo generates its result.' : 'Play money only. Outcomes and settlement are supplied by the connected game server. If disconnected, reload to resume an unfinished round. Long-run expected return does not predict an individual session.'}</p></div></div>`;
 }
 
 /* ---------- social casino wording (stake.us): Engine's restricted phrases and their replacements ---------- */
@@ -3849,6 +3953,11 @@ mascot('idle');
 let NET = RGS;
 function goLocal(why){
   NET = Local; window.__sk8mode = 'local';
+  BONUS[0].desc = '10 free spins. Multiplier wilds stay in their individual positions; no full-reel expansion.';
+  BONUS[1].desc = '10 free spins. Wilds on reels 2-4 expand when they can form a win.';
+  BONUS[2].desc = '10 free spins. Winning wild reels stay; new wilds on them multiply the reel.';
+  BONUS[0].trig = '3 wilds, plain or multiplied';
+  document.body.classList.add('demo');
   const b = $('localbadge'); if (b){ b.hidden = false; b.title = why || ''; }
   $('spinbtn').disabled = false; $('autobtn').disabled = false;
   return bootPlay();
@@ -3861,362 +3970,6 @@ else if (RGS.ok){
     .catch(e => goLocal('server unreachable: ' + (e && e.code || 'error')));
 }
 else goLocal('no rgs_url');
-})();
-</script>
-<script>
-// Sk8Crowd: background skaters riding the park behind the slot (no sound). They follow the real obstacles in
-// sk8-park.svg: airs and tricks on the quarter pipe, grinds down the stair handrail and along the pink rail, and
-// some bails. Sk8Crowd.start(sceneEl) lays an SVG over the park with the same 1600x900 box and the same
-// "xMidYMax slice" fit as the park background, so the riders line up with the drawing at every screen size.
-// Riders take turns: usually one at a time (sometimes two), picked from four lanes (quarter pipe, handrail, pink rail,
-// a cruiser pushing across the park), with a random pause between runs. Grinds throw sparks off the trucks, and on flat
-// ground riders push with the back foot, then coast.
-// Off for prefers-reduced-motion; paused while the tab is hidden.
-(function(root){
-  const NS = 'http://www.w3.org/2000/svg';
-  const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
-  const lerp = (a, b, t) => a + (b - a)*t, clamp = (t, a = 0, b = 1) => Math.max(a, Math.min(b, t));
-  const smooth = t => { t = clamp(t); return t*t*(3 - 2*t); }, bump = t => Math.sin(Math.PI*clamp(t));
-  const norm = (x, y) => { const l = Math.hypot(x, y) || 1; return [x/l, y/l]; };
-  const span = (t, a, b) => clamp((t - a)/(b - a));
-  const pick = a => a[Math.floor(Math.random()*a.length)];
-
-  // ---------- park geometry (sk8-park.svg coordinates) ----------
-  // quarter pipe face: quadratic curve from the ground to the coping (group translate(-537 371) scale(2.4))
-  const Q0 = [19.8, 639.8], QC = [235.8, 639.8], Q1 = [250.2, 452.6];
-  const qp = s => [(1-s)*(1-s)*Q0[0] + 2*(1-s)*s*QC[0] + s*s*Q1[0], (1-s)*(1-s)*Q0[1] + 2*(1-s)*s*QC[1] + s*s*Q1[1]];
-  const qt = s => norm(2*(1-s)*(QC[0]-Q0[0]) + 2*s*(Q1[0]-QC[0]), 2*(1-s)*(QC[1]-Q0[1]) + 2*s*(Q1[1]-QC[1]));
-  const LIP = qt(1);
-  // stair handrail (top right to bottom left), stair deck and the ground at the foot of the stairs
-  const H0 = [1346, 414], H1 = [1140, 563], DECK = 476.6, FOOT = 640;
-  const HU = norm(H1[0]-H0[0], H1[1]-H0[1]);
-  // pink rail in the foreground and the ground in front of it
-  const R0x = 950, R1x = 1228, RY = 752, RG = 826;
-
-  // ---------- one rider: a board group and a body group, each placed with its own frame ----------
-  const CAPS = ['#e8322d','#2d6cdf','#ffd21f','#35c46a','#ff3ea5','#ff8a1e','#9b5cff'];
-  const DECKS = ['#ff2fb0','#3be3ff','#ffe600','#9bff3b','#ff8a1e','#ffffff'];
-  function rider(layer){
-    const g = el('g', {opacity: 0}, layer);
-    const board = el('g', {}, g), boardInner = el('g', {}, board);
-    const deckCol = pick(DECKS);
-    el('path', {d: 'M-30 -8L-24 -4H24L30 -8', fill: 'none', stroke: '#141414', 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, boardInner);
-    el('path', {d: 'M-24 -4H24', stroke: deckCol, 'stroke-width': 2.5, 'stroke-linecap': 'round'}, boardInner);
-    el('circle', {cx: -15, cy: 1, r: 3.6, fill: '#fff', stroke: '#141414', 'stroke-width': 2.4}, boardInner);
-    el('circle', {cx: 15, cy: 1, r: 3.6, fill: '#fff', stroke: '#141414', 'stroke-width': 2.4}, boardInner);
-    const body = el('g', {}, g), bodyInner = el('g', {}, body);
-    const st = {fill: 'none', stroke: '#141414', 'stroke-width': 5.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'};
-    const legs = el('path', st, bodyInner), torso = el('path', st, bodyInner), arms = el('path', st, bodyInner);
-    const head = el('circle', {r: 9, fill: '#fff', stroke: '#141414', 'stroke-width': 4}, bodyInner);
-    const cap = el('path', {fill: pick(CAPS), stroke: '#141414', 'stroke-width': 2.5, 'stroke-linejoin': 'round'}, bodyInner);
-    // pose: c crouch 0..1, a arms 0 (down) .. 1 (up), grab (front hand to the nose), lean (-1..1), lift (feet above deck)
-    function pose(p){
-      const c = p.c || 0, a = p.a == null ? .35 : p.a, lean = p.lean || 0, lift = p.lift || 0;
-      const fy = -6 - lift, ff = [12, fy];
-      let fb = [-12, fy];
-      if (p.push != null){ const q = p.push % 1;
-        fb = q < .2 ? [lerp(-12, 6, q/.2), lerp(fy, 7, q/.2) - 6*bump(q/.2)] : q < .7 ? [lerp(6, -40, (q - .2)/.5), 8] : [lerp(-40, -12, (q - .7)/.3), lerp(7, fy, (q - .7)/.3) - 8*bump((q - .7)/.3)]; }
-      const hip = [-1 + lean*3 + (p.push != null ? 3 : 0), -42 + 15*c - lift*.6];
-      const kf = [(hip[0] + ff[0])/2 + 5 + 6*c, (hip[1] + fy)/2 - 1], kb = [(hip[0] + fb[0])/2 + 5 + 6*c, (hip[1] + fy)/2 - 1];
-      const neck = [hip[0] + 3 + 6*c + lean*6, hip[1] - 29 + 4*c];
-      const sh = [neck[0], neck[1] + 5];
-      // arms spread forward and back; a lifts them from down by the hips (-0.9 rad) to up by the head (+0.9 rad)
-      const ang = lerp(-.9, .9, a), hf = p.grab ? [17, fy - 3] : [sh[0] + 17*Math.cos(ang), sh[1] - 17*Math.sin(ang)];
-      const hb = [sh[0] - 17*Math.cos(ang), sh[1] - 17*Math.sin(ang)];
-      legs.setAttribute('d', `M${fb}L${kb}L${hip}L${kf}L${ff}`);
-      torso.setAttribute('d', `M${hip}L${neck}`);
-      arms.setAttribute('d', `M${hf}L${sh}L${hb}`);
-      const hx = neck[0] + 2, hy = neck[1] - 11;
-      head.setAttribute('cx', hx); head.setAttribute('cy', hy);
-      cap.setAttribute('d', `M${hx-9.5} ${hy-1}Q${hx-8} ${hy-14} ${hx+1} ${hy-12.5}Q${hx+9} ${hy-11} ${hx+9.5} ${hy-2}L${hx+15} ${hy-1}Z`);
-    }
-    // frame: position + facing direction u (unit); "up" is the side of u away from the surface, never pointing down
-    const place = (node, x, y, u, extra) => {
-      let up = [u[1], -u[0]]; if (up[1] > 1e-6) up = [-up[0], -up[1]];
-      node.setAttribute('transform', `matrix(${u[0]} ${u[1]} ${-up[0]} ${-up[1]} ${x} ${y})` + (extra || ''));
-    };
-    return {
-      g,
-      draw(f){
-        g.setAttribute('opacity', f.o == null ? 1 : f.o);
-        const b = f.board || f, by = f.body || f;
-        place(board, b.x, b.y, b.u, b.rot ? ` rotate(${b.rot})` : '');
-        const sx = Math.cos((f.shove || 0)*Math.PI/180), sy = Math.cos((f.flip || 0)*Math.PI/180), yaw = Math.cos((f.spin || 0)*Math.PI/180);
-        const bsx = Math.sign(sx*yaw || 1)*Math.max(.18, Math.abs(sx*yaw)), bsy = Math.sign(sy || 1)*Math.max(.15, Math.abs(sy));
-        boardInner.setAttribute('transform', `translate(0 ${-(f.boardLift || 0)}) scale(${bsx} ${bsy})`);
-        place(body, by.x, by.y, by.u, by.rot ? ` rotate(${by.rot})` : '');
-        bodyInner.setAttribute('transform', `scale(${Math.sign(yaw || 1)*Math.max(.2, Math.abs(yaw))} 1)`);
-        pose(f.pose || {});
-      },
-      remove(){ g.remove(); }
-    };
-  }
-
-  // ---------- runs: each is a list of segments {d (seconds), f(t) -> frame} ----------
-  const seq = segs => ({total: segs.reduce((s, x) => s + x.d, 0), at(tau){ let t = tau; for (const s of segs){ if (t <= s.d) return s.f(t/s.d); t -= s.d; } return null; }});
-  const fadeIn = t => smooth(t/.25), fadeOut = t => 1 - smooth((t - .7)/.3);
-  const ground = (x, y) => ({x, y, u: [1, 0]});
-  // pose for a stretch of flat ground: n pushes spread over the first 'share' of it, then coast
-  const rolling = (t, n, share) => t < share ? {c: .4, a: .25, push: (t/share)*n} : {c: .25, a: .3};
-
-  // quarter pipe: roll in from the left, up the face, a trick above the coping, back down fakie and out
-  function rampRun(trick){
-    const H = trick === 'rock' ? 0 : trick === 'indy' || trick === 'spin' ? 150 : 120;
-    const air = trick === 'rock' ? .9 : 1.1;
-    const bail = trick === 'bailflip' || trick === 'bailspin';
-    const segs = [
-      {d: 1.6, f: t => ({...ground(lerp(-150, Q0[0], t), Q0[1]), o: fadeIn(t), pose: rolling(t, 2, .7)})},
-      {d: .6, f: t => { const s = t, [x, y] = qp(s); return {x, y, u: qt(s), pose: {c: .25 + .45*t, a: .35}}; }},
-      {d: air, f: t => {
-        const y = Q1[1] - 4*H*t*(1 - t), x = Q1[0] + (trick === 'rock' ? 4 : 10)*bump(t);
-        // the body swings from the wall angle toward upright at the top of the air, then back for the landing
-        const th = Math.atan2(LIP[1], LIP[0]), tu = lerp(th, -.18, .85*bump(t)), f = {x, y, u: [Math.cos(tu), Math.sin(tu)], pose: {c: .45, a: .5}};
-        if (trick === 'rock'){ f.pose = {c: .55, a: .4, lean: -.5}; f.board = {x: Q1[0] + 8, y: Q1[1] - 8, u: [0, -1], rot: 0}; f.body = {x: Q1[0] + 8, y: Q1[1] - 8, u: [lerp(-.2, .2, bump(t)), -1]}; f.body.u = norm(...f.body.u); return f; }
-        f.pose.c = .45 + .4*bump(t); f.boardLift = 5*bump(t);
-        if (trick === 'kickflip' || trick === 'bailflip') f.flip = (trick === 'bailflip' ? 250 : 360)*smooth(span(t, .12, .62));
-        if (trick === 'heelflip') f.flip = -360*smooth(span(t, .12, .62));
-        if (trick === 'shuv') f.shove = 180*smooth(span(t, .15, .65));
-        if (trick === 'spin' || trick === 'bailspin') f.spin = (trick === 'bailspin' ? 470 : 360)*smooth(span(t, .05, .9));
-        if (trick === 'indy'){ f.pose = {c: .85, a: .7, grab: t > .2 && t < .78}; f.boardLift = 3; }
-        if (trick === 'ollie') f.pose.a = .5 + .3*bump(t);
-        return f; }},
-    ];
-    if (!bail){
-      segs.push({d: .6, f: t => { const s = 1 - t, [x, y] = qp(s); return {x, y, u: qt(s), pose: {c: .6 - .3*t, a: .4}}; }});
-      segs.push({d: 1.1, f: t => ({...ground(lerp(Q0[0], -100, t), Q0[1]), o: fadeOut(t), pose: {c: .25, a: .3}})});
-    } else {
-      // the board drops down the face and rolls out; the rider tumbles down after it and lies there a moment
-      segs.push({d: 2.4, f: t => {
-        const bs = 1 - clamp(t/.3), [bx0, by0] = qp(Math.max(0, bs));
-        const board = t < .3 ? {x: bx0, y: by0, u: qt(Math.max(.001, bs)), rot: 30*t} : {x: lerp(Q0[0], -110, (t - .3)/.7), y: Q0[1], u: [1, 0]};
-        const fs = 1 - clamp(t/.45), [fx, fy] = qp(Math.max(0, fs));
-        const body = t < .45 ? {x: fx + 10, y: fy - 6, u: qt(Math.max(.001, fs)), rot: 220*t/.45} : {x: Q0[0] + 34, y: Q0[1] + 4, u: [1, 0], rot: 95};
-        return {board, body, x: fx, y: fy, u: [1, 0], o: 1 - smooth((t - .82)/.18), pose: {c: .3, a: .9}}; }});
-    }
-    return seq(segs);
-  }
-
-  // stair handrail: roll along the deck from the right, ollie onto the rail, grind down, drop to the ground, roll out
-  function handrailRun(trick){
-    const uL = [-1, 0], bail = trick === 'bail';
-    const top = [H0[0] + HU[0]*-2, H0[1] - 4];
-    const segs = [
-      {d: 1.5, f: t => ({x: lerp(1740, 1392, t), y: DECK, u: uL, o: fadeIn(t), pose: rolling(t, 2, .65)})},
-      {d: .38, f: t => ({x: lerp(1392, top[0], t), y: lerp(DECK, top[1], t) - 34*bump(t), u: uL, pose: {c: .35 + .35*bump(t), a: .55}, boardLift: 4*bump(t)})},
-    ];
-    const railAt = t => [lerp(top[0], H1[0], t), lerp(top[1], H1[1] - 4, t)];
-    const grindFrame = (t, shove) => { const [x, y] = railAt(t); return {x, y, u: HU, sparks: true, shove, spin: shove ? 70 : 0, pose: {c: .5, a: .7, lean: shove ? .2 : 0}}; };
-    if (!bail){
-      segs.push({d: 1.0, f: t => grindFrame(t, trick === 'board' ? 90 : 0)});
-      segs.push({d: .36, f: t => ({x: lerp(H1[0], 1086, t), y: lerp(H1[1] - 4, FOOT, t) - 18*bump(t), u: uL, pose: {c: .4 + .3*bump(t), a: .55}})});
-      segs.push({d: 1.6, f: t => ({x: lerp(1086, 900, t), y: FOOT, u: uL, o: fadeOut(t), pose: t > .25 && t < .6 ? {c: .3, a: .25, push: (t - .25)/.35} : {c: .25, a: .3}})});
-    } else {
-      segs.push({d: .5, f: t => grindFrame(t*.5, 0)});
-      // the rider slips off the rail and falls to the ground beside the stairs; the board grinds on and clatters down
-      segs.push({d: 2.2, f: t => {
-        const [sx, sy] = railAt(.5);
-        const body = t < .4 ? {x: lerp(sx, sx - 40, t/.4), y: sy + (FOOT + 4 - sy)*Math.pow(t/.4, 2), u: HU, rot: -180*t/.4} : {x: sx - 40, y: FOOT + 4, u: uL, rot: -95};
-        const board = t < .35 ? (() => { const [bx, by] = railAt(.5 + .5*t/.35); return {x: bx, y: by, u: HU, rot: 0}; })() : {x: lerp(H1[0], 1010, (t - .35)/.65), y: FOOT, u: uL, rot: 0};
-        return {board, body, x: sx, y: sy, u: uL, o: 1 - smooth((t - .82)/.18), pose: {c: .3, a: .9}}; }});
-    }
-    return seq(segs);
-  }
-
-  // pink rail: roll in from the left, ollie up, grind across, pop off (maybe with a flip) and roll out
-  function railRun(trick){
-    const uR = [1, 0], bail = trick === 'bail';
-    const segs = [
-      {d: 1.5, f: t => ({x: lerp(700, 918, t), y: RG, u: uR, o: fadeIn(t), pose: rolling(t, 2, .65)})},
-      {d: .36, f: t => ({x: lerp(918, R0x, t), y: lerp(RG, RY, t) - 30*bump(t), u: uR, pose: {c: .35 + .35*bump(t), a: .55}, boardLift: 4*bump(t)})},
-    ];
-    const grind = t => ({x: lerp(R0x, R1x, t), y: RY, u: trick === 'nose' ? norm(1, .08) : uR, sparks: true, pose: {c: .5, a: .7, lean: trick === 'nose' ? .6 : 0}});
-    if (!bail){
-      segs.push({d: .95, f: grind});
-      segs.push({d: .42, f: t => ({x: lerp(R1x, 1272, t), y: lerp(RY, RG, t) - 32*bump(t), u: uR, flip: trick === 'flipout' ? 360*smooth(span(t, .05, .75)) : 0, boardLift: 6*bump(t), pose: {c: .4 + .4*bump(t), a: .6}})});
-      segs.push({d: 1.5, f: t => ({x: lerp(1272, 1460, t), y: RG, u: uR, o: fadeOut(t), pose: t > .25 && t < .6 ? {c: .3, a: .25, push: (t - .25)/.35} : {c: .25, a: .3}})});
-    } else {
-      segs.push({d: .4, f: t => grind(t*.4)});
-      // the board stops dead on the rail; the rider flies forward over it and lands on the ground
-      segs.push({d: 2.1, f: t => {
-        const sx = lerp(R0x, R1x, .4);
-        const body = t < .45 ? {x: sx + 120*t/.45, y: RY - 40*bump(t/.45*.6) + (RG + 4 - RY)*Math.pow(t/.45, 2), u: uR, rot: 200*t/.45} : {x: sx + 120 + 20*clamp((t - .45)/.2), y: RG + 4, u: uR, rot: 95};
-        const board = t < .25 ? {x: sx, y: RY, u: uR, rot: 0} : {x: sx - 10*clamp((t - .25)/.2), y: lerp(RY, RG, smooth((t - .25)/.2)), u: uR, rot: -25*clamp((t - .25)/.2)};
-        return {board, body, x: sx, y: RY, u: uR, o: 1 - smooth((t - .82)/.18), pose: {c: .3, a: .9}}; }});
-    }
-    return seq(segs);
-  }
-
-  function cruiseRun(trick){
-    const dir = Math.random() < .5 ? 1 : -1, x0 = dir > 0 ? -120 : 1720, x1 = dir > 0 ? 1720 : -120, y = 694, u = [dir, 0];
-    return seq([{d: 9, f: t => {
-      const x = lerp(x0, x1, t), f = {x, y, u, o: smooth(t/.06)*(1 - smooth((t - .94)/.06)), pose: {c: .25, a: .3}};
-      const cyc = (t*9)/1.6, k = cyc % 1;
-      if (k < .5) f.pose = {c: .3, a: .25, push: k/.5};
-      if (trick === 'ollie' && t > .55 && t < .62){ const q = (t - .55)/.07; f.y = y - 34*bump(q); f.pose = {c: .35 + .4*bump(q), a: .55}; f.boardLift = 5*bump(q); }
-      return f; }}]);
-  }
-  const LANES = {
-    ramp: {tricks: ['ollie','kickflip','heelflip','shuv','spin','indy','rock','bailflip','bailspin'], make: rampRun, gap: [1.2, 4]},
-    handrail: {tricks: ['5050','board','bail','5050'], make: handrailRun, gap: [2.5, 6]},
-    rail: {tricks: ['5050','flipout','nose','bail'], make: railRun, gap: [2, 5.5]},
-    cruise: {tricks: ['push','push','ollie'], make: cruiseRun, gap: [3, 8]},
-  };
-
-  let svg = null, sparkLayer = null, raf = 0, last = 0, active = [], cooldown = 1.2, prevLane = null;
-  const sparks = [];
-  // one rider at a time, sometimes a second one joins; never two on the same lane, never the same lane twice running
-  function launch(){
-    const names = Object.keys(LANES).filter(n => !active.some(a => a.lane === n) && n !== prevLane);
-    const lane = pick(names), L = LANES[lane]; prevLane = lane;
-    let tr; do { tr = pick(L.tricks); } while (tr === L.prev && L.tricks.length > 1); L.prev = tr;
-    active.push({lane, run: L.make(tr), r: rider(svg), t: 0});
-  }
-  function spark(x, y, u){
-    // a short streak thrown backwards off the trucks, falling as it fades
-    const sp = 120 + Math.random()*160, back = -1, ang = Math.atan2(u[1], u[0]) + Math.PI*(back < 0 ? 1 : 0) + (Math.random() - .5)*.9;
-    const n = el('line', {stroke: Math.random() < .5 ? '#ffd21f' : '#ff8a1e', 'stroke-width': 2.6, 'stroke-linecap': 'round'}, sparkLayer);
-    sparks.push({n, x, y, vx: Math.cos(ang)*sp, vy: Math.sin(ang)*sp - 60, life: .22 + Math.random()*.18, age: 0});
-  }
-  function tick(now){
-    raf = requestAnimationFrame(tick);
-    const dt = Math.min(.1, last ? (now - last)/1000 : 0); last = now;
-    if (cooldown > 0) cooldown -= dt;
-    else if (!active.length || (active.length === 1 && Math.random() < .0006)) { launch(); cooldown = 2 + Math.random()*5; }
-    for (let i = active.length - 1; i >= 0; i--){
-      const s = active[i]; s.t += dt;
-      const f = s.run.at(s.t);
-      if (!f){ s.r.remove(); active.splice(i, 1); if (!active.length) cooldown = Math.max(cooldown, 1.5 + Math.random()*4.5); continue; }
-      s.r.draw(f);
-      if (f.sparks && dt > 0){ const d = [-f.u[1], f.u[0]], down = d[1] < 0 ? [-d[0], -d[1]] : d;
-        for (const off of [-15, 15]) if (Math.random() < .55) spark(f.x + f.u[0]*off + down[0]*3, f.y + f.u[1]*off + down[1]*3, f.u); }
-    }
-    for (let i = sparks.length - 1; i >= 0; i--){
-      const p = sparks[i]; p.age += dt; if (p.age >= p.life){ p.n.remove(); sparks.splice(i, 1); continue; }
-      p.vy += 900*dt; const x2 = p.x + p.vx*dt, y2 = p.y + p.vy*dt;
-      p.n.setAttribute('x1', p.x); p.n.setAttribute('y1', p.y); p.n.setAttribute('x2', x2); p.n.setAttribute('y2', y2); p.n.setAttribute('opacity', 1 - p.age/p.life);
-      p.x = x2; p.y = y2;
-    }
-  }
-  function start(scene){
-    if (svg || !scene || (root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-    svg = el('svg', {viewBox: '0 0 1600 900', preserveAspectRatio: 'xMidYMax slice', 'aria-hidden': 'true'});
-    svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden';
-    scene.appendChild(svg);
-    sparkLayer = el('g', {}, svg);
-    raf = requestAnimationFrame(tick);
-    document.addEventListener('visibilitychange', () => { if (document.hidden){ cancelAnimationFrame(raf); raf = 0; } else if (!raf){ last = 0; raf = requestAnimationFrame(tick); } });
-  }
-  root.Sk8Crowd = {start};
-})(typeof window !== 'undefined' ? window : this);
-
-try { Sk8Crowd.start(document.querySelector('.scene')); } catch(e) {}
-</script>
-<div id="devcycle" hidden><button data-phase="0">DAY</button><button data-phase="108">NIGHT</button><button data-phase="resume">RESUME</button><b>RUNNING</b></div>
-<script>
-/* Size the skater layer exactly like the park backdrop's `cover` sizing
-   (16:9, centred horizontally, anchored to the bottom) so the sprites stay
-   locked to the bowl, the rail and the flat at every window size. */
-(function(){
-  var scene = document.querySelector('.scene');
-  var layers = [document.getElementById('sklayer'), document.getElementById('fxlayer')]
-                 .filter(Boolean);
-  if (!scene || !layers.length) return;
-  function fit(){
-    var w = scene.clientWidth, h = scene.clientHeight, ar = 16/9, lw, lh;
-    if (!w || !h) return;
-    if (w/h > ar){ lw = w; lh = w/ar; } else { lh = h; lw = h*ar; }
-    layers.forEach(function(layer){
-      layer.style.width = lw+'px'; layer.style.height = lh+'px';
-      layer.style.left = ((w-lw)/2)+'px'; layer.style.top = (h-lh)+'px';
-    });
-  }
-  fit();
-  if (window.ResizeObserver) new ResizeObserver(fit).observe(scene);
-  addEventListener('resize', fit);
-
-  /* Each background skater is a Sk8Anim stick figure looping a trick.
-     Sk8Anim draws its own ground dashes (and a rail for 'grind') inside
-     its box -- hide those, the park already has real ones. */
-  function ride(id, trick){
-    var elx = document.getElementById(id);
-    if (!elx || !window.Sk8Anim) return;
-    Sk8Anim.play(elx, trick);
-    var scn = elx.querySelector('svg > g');
-    if (!scn) return;
-    scn.children[0].style.display = 'none';                 // ground dashes
-    if (trick === 'grind' && scn.children[1]) scn.children[1].style.display = 'none';  // its own rail
-  }
-  /* ===== TEMPORARY dev control ===== */
-  (function(){
-    var panel = document.getElementById('devcycle');
-    // Day/night scrubber: a development control, not part of the game. It stays
-    // hidden unless the address asks for it, so players never see it.
-    if (!panel) return;
-    if (!/[?&]dev=1(&|$)/.test(location.search)) { panel.remove(); return; }
-    panel.hidden = false;
-    if (!panel) return;
-    var tag = panel.querySelector('b'), arrive = null;
-    var CYCLED = '.sky,.orb,.clouds,.lampbar,.citylights,.signalbeam,.signaldisc';
-    function hold(sec){
-      document.querySelectorAll(CYCLED).forEach(function(e){
-        e.style.animationDelay = (-sec)+'s';
-        e.style.animationPlayState = 'paused';
-      });
-      // the lookout is shown or hidden outright, so its cloak keeps moving
-      var night = sec > 70 && sec < 160;
-      var g = document.getElementById('lookoutGlide'),
-          pch = document.getElementById('lookoutPerch');
-      // animationPlayState covers every animation on the element, so the
-      // visibility animation has to be dropped from the list outright --
-      // otherwise un-pausing the cloak restarts perchHold and hides him.
-      clearTimeout(arrive);
-      var strip = g && g.querySelector('i');
-      if (!night){
-        if (g){ g.style.animation = 'none'; g.style.opacity = '0'; }
-        if (pch){ pch.style.animation = 'none'; pch.style.opacity = '0'; }
-      } else {
-        // fly him in from the left, fast, then hand over to the perch
-        if (pch){ pch.style.animation = 'none'; pch.style.opacity = '0'; }
-        if (g){
-          g.style.opacity = '1';
-          g.style.animation = 'none';
-          void g.offsetWidth;                       // restart the animation
-          g.style.animation = 'swooshL 1.7s linear forwards';
-          if (strip) strip.style.animation = 'glideFrames .3s steps(12) infinite';
-        }
-        arrive = setTimeout(function(){
-          if (g){ g.style.opacity = '0'; g.style.animation = 'none'; }
-          if (strip) strip.style.animation = '';
-          if (pch){ pch.style.opacity = '1'; }
-        }, 1700);
-      }
-      tag.textContent = night ? 'NIGHT (PAUSED)' : 'DAY (PAUSED)';
-    }
-    function resume(){
-      clearTimeout(arrive);
-      document.querySelectorAll(CYCLED).forEach(function(e){
-        e.style.animationDelay = ''; e.style.animationPlayState = '';
-      });
-      ['lookoutGlide','lookoutPerch'].forEach(function(id){
-        var e = document.getElementById(id);
-        if (e){ e.style.opacity = ''; e.style.animation = '';
-                e.style.animationPlayState = '';
-                var st = e.querySelector('i'); if (st) st.style.animation = ''; }
-      });
-      tag.textContent = 'RUNNING';
-    }
-    panel.addEventListener('click', function(ev){
-      var b = ev.target.closest('button');
-      if (!b) return;
-      if (b.dataset.phase === 'resume') resume(); else hold(+b.dataset.phase);
-    });
-  })();
-
-  /* the lookout comes in from a random side each page load */
-  scene.classList.add(Math.random() < 0.5 ? 'fromL' : 'fromR');
-
-  ride('skRail', 'stairclimb');
-  ride('skIdle', 'idle');
 })();
 </script>
 <script>
