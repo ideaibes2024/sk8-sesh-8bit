@@ -1343,7 +1343,8 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
       for(const y of [7,20]) a+=rect(5,y,22,4,ink)+rect(7,y+1,18,2,'#ccd9e2')+rect(13,y-2,6,2,ink)+rect(13,y+4,6,2,ink)+rect(14,y+4,4,1,'#ccd9e2');
       a+=rect(15,12,2,6,ink);
     } else if(id==='face') {
-      a+=rect(9,12,14,12,ink)+rect(11,14,10,8,'#dfad79')+path('M8 13V9H10V6H14V4H18V6H22V9H24V13Z',ink)+rect(10,9,12,3,'#e24f56')+rect(12,7,8,2,'#e24f56')+rect(10,12,14,2,white)+rect(10,15,5,3,ink)+rect(17,15,5,3,ink)+rect(15,16,2,1,ink)+rect(14,21,4,1,ink)+path('M9 24H23V27H26V29H6V27H9Z','#31588e');
+      // Helmet replaces the skater portrait: no people anywhere in the scene or reels.
+      a+=path('M10 6H22V8H25V11H27V22H24V25H9V23H5V13H7V9H10Z',ink)+path('M11 8H21V10H24V13H25V20H22V22H9V21H7V14H9V11H11Z','#e95b55')+rect(11,10,3,4,ink)+rect(17,10,3,4,ink)+rect(9,20,14,2,white)+rect(19,22,2,4,ink)+rect(14,26,7,2,ink);
     } else if(id==='board') {
       a+=path('M22 4H26V6H28V10H26V14H24V18H20V22H16V26H12V28H7V26H5V22H7V18H11V14H15V10H19V6H22Z',ink)+path('M22 6H25V8H26V10H24V14H22V16H18V20H14V24H11V26H8V24H7V22H9V18H13V14H17V10H21V8H22Z','#e55753')+rect(15,13,4,6,'#f8d76b')+rect(12,18,4,3,'#f8d76b')+rect(21,8,3,3,white)+rect(8,22,3,3,white);
     } else if(id==='wild') {
@@ -2992,7 +2993,7 @@ const GAME = {"pays":[[0.1,0.3,1.5],[0.1,0.3,1.5],[0.2,0.6,2],[0.2,0.6,2],[0.2,0
 const $ = id => document.getElementById(id);
 const Art = window.Sk8Art || null, Snd = window.Sk8Audio || null;
 const W = TT.W, S1 = TT.S1, S2 = TT.S2, ROWS = TT.ROWS, REELS = TT.REELS, CELLS = TT.CELLS;
-const NAMES = ['Cassette','Sneaker','Spray can','Lighter','Cap','Wheels','Trucks','Skater','Board','Wild','SESH tape','LEGEND tape'];
+const NAMES = ['Cassette','Sneaker','Spray can','Lighter','Cap','Wheels','Trucks','Helmet','Board','Wild','SESH tape','LEGEND tape'];
 const SHORT = ['CAS','SNK','SPR','LTR','CAP','WHL','TRK','SKTR','BRD','W','SESH','LGND'];
 const BONUS = [
   {name:'Crew', trig:'3 wilds', desc:'10 free spins. Plain wilds (no multiplier) land often on reels 2-4 and always fill the whole reel.'},
