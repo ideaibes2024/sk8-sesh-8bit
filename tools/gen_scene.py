@@ -536,20 +536,22 @@ def build(night=False, sky=True, empty=False):
     for i in range(0, W, 7):
         c.rect(i + (i % 5), wall_bot - 6 + (i % 3), 2, 4, hx(P['wall_d']), .35)
 
-    # The wall is read left to right, so the pieces are laid out in lanes
-    # with clear wall between them -- nothing overlaps its neighbour.
-    #   8  SK8 | 54 KRUZ/DUSK | 124 SESH | 182 HAZE/ZONK | 215 throwie
-    #   244 LOCALS/ONLY | 292 OZ      (the gaps get the small marks)
-    tagink = OUT
-    text(c, 8, wall_top + 4, 'SK8', hx('#ff2fb0'), px=2, ink=tagink)
-    text(c, 124, wall_top + 3, 'SESH', hx('#19c7c7'), px=2, ink=tagink)
-    text(c, 244, wall_top + 4, 'LOCALS', hx('#3ddc84'), px=1, ink=tagink)
-    text(c, 244, wall_top + 13, 'ONLY', hx('#ff8a1e'), px=1, ink=tagink)
-    text(c, 292, wall_top + 5, 'OZ', hx('#ffffff'), px=2, ink=tagink)
-    # abstract throwie, centred in the gap between ZONK and LOCALS
-    c.fellipse(226, wall_top + 11, 12, 7, hx('#a855f7'))
-    c.fellipse(226, wall_top + 10, 10, 5, hx('#ff2fb0'))
-    c.line((218, wall_top + 16), (234, wall_top + 6), hx('#ffffff'), 1, .8)
+    # Keep the temporary empty-park wall bare; preserve paint for the original preset.
+    if not empty:
+        # The wall is read left to right, so the pieces are laid out in lanes
+        # with clear wall between them -- nothing overlaps its neighbour.
+        #   8  SK8 | 54 KRUZ/DUSK | 124 SESH | 182 HAZE/ZONK | 215 throwie
+        #   244 LOCALS/ONLY | 292 OZ      (the gaps get the small marks)
+        tagink = OUT
+        text(c, 8, wall_top + 4, 'SK8', hx('#ff2fb0'), px=2, ink=tagink)
+        text(c, 124, wall_top + 3, 'SESH', hx('#19c7c7'), px=2, ink=tagink)
+        text(c, 244, wall_top + 4, 'LOCALS', hx('#3ddc84'), px=1, ink=tagink)
+        text(c, 244, wall_top + 13, 'ONLY', hx('#ff8a1e'), px=1, ink=tagink)
+        text(c, 292, wall_top + 5, 'OZ', hx('#ffffff'), px=2, ink=tagink)
+        # abstract throwie, centred in the gap between ZONK and LOCALS
+        c.fellipse(226, wall_top + 11, 12, 7, hx('#a855f7'))
+        c.fellipse(226, wall_top + 10, 10, 5, hx('#ff2fb0'))
+        c.line((218, wall_top + 16), (234, wall_top + 6), hx('#ffffff'), 1, .8)
 
     # ---------------- ground ---------------------------------------------
     c.rect(0, wall_bot, W, H - wall_bot, hx(P['ground']))
