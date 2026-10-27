@@ -778,8 +778,16 @@ body.replay .ctrlbar,body.replay #menubtn,body.replay .spinwrap,body.replay #buy
 .scene #clouds2{opacity:.6;filter:none!important;background-position:140px 0}
 .slot .scene .park{background-image:url("park-day.svg")!important;filter:none!important}
 </style>
+<style>
+/* Temporary scenery view. Remove park-preview from body to restore the slot. */
+body.park-preview .slotbar,body.park-preview .machine,body.park-preview .ctrlbar,
+body.park-preview .panel,body.park-preview .drawer,body.park-preview .sheet,
+body.park-preview .modal,body.park-preview .backdrop{display:none!important}
+body.park-preview .scene::after{background:none}
+body.park-preview .scene .park{background-image:url("park-empty.svg")!important}
+</style>
 </head>
-<body>
+<body class="park-preview">
 <div class="wrap">
   <section id="tab-play" role="tabpanel" class="slot">
     <div class="scene" aria-hidden="true"><div class="sky"></div><div class="orb" id="sun"></div><div class="clouds" id="clouds1"></div><div class="clouds" id="clouds2"></div><div class="park"></div></div>
@@ -3963,7 +3971,9 @@ function goLocal(why){
   $('spinbtn').disabled = false; $('autobtn').disabled = false;
   return bootPlay();
 }
-if (replay){ if (RGS.hasReplay) bootReplay(); else $('replayinfo').textContent = 'Missing rgs_url.'; }
+if (document.body.classList.contains('park-preview')) {
+  // Scenery only: keep the slot dormant until the preview class is removed.
+} else if (replay){ if (RGS.hasReplay) bootReplay(); else $('replayinfo').textContent = 'Missing rgs_url.'; }
 else if (q.get('local') === '1') goLocal('forced by ?local=1');
 else if (RGS.ok){
   $('calib').textContent = 'connecting...';

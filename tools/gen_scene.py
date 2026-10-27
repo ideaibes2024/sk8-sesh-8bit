@@ -415,7 +415,7 @@ POSE_FILM = dict(
 # --------------------------------------------------------------------------
 # the park
 # --------------------------------------------------------------------------
-def build(night=False, sky=True):
+def build(night=False, sky=True, empty=False):
     P = dict(
         sky=['#5bbdf7', '#7fd3ff', '#a9e2ff', '#cdeeff', '#eaf8ff'],
         sun='#ffe14a', cloud='#ffffff', cloud_sh='#c9e4f5',
@@ -490,7 +490,7 @@ def build(night=False, sky=True):
 
     # ---------------- distant skyline + palms ----------------------------
     sky_line = 96
-    for bx, bw, bh in BUILDINGS:
+    for bx, bw, bh in BUILDINGS + (((90, 18, 38), (111, 15, 29), (129, 22, 45), (154, 14, 34), (171, 22, 40), (196, 19, 27)) if empty else ()):
         c.rect(bx, sky_line - bh, bw, bh, hx(P['far']))
         c.rect(bx, sky_line - bh, bw, 1, OUT2)
         if not night:
@@ -575,6 +575,24 @@ def build(night=False, sky=True):
         c.rect(sx_ + 2, sy_ + 1, sl - 6, 1, hx('#5b564f'), .18)
 
     ink = OUT
+
+    # Temporary empty-park preset: return before drawing obstacles or props.
+    # The original populated park generator and SVGs remain available.
+    if empty:
+        # Half-height chain-link fence exposes the skyline and palms.
+        fz_top, fz_bot = 87, 96
+        mesh = hx('#8d96a3') if not night else hx('#5f5a70')
+        span = fz_bot - fz_top
+        for x in range(-12, W + 12, 6):
+            c.line((x, fz_top), (x + span, fz_bot), mesh, 1)
+            c.line((x + span, fz_top), (x, fz_bot), mesh, 1)
+        c.rect(0, fz_top - 1, W, 2, ink)
+        c.rect(0, fz_top - 1, W, 1, hx(P['fence']))
+        c.rect(0, fz_bot - 1, W, 2, ink)
+        for x in range(10, W, 54):
+            c.rect(x, fz_top - 3, 3, fz_bot - fz_top + 4, ink)
+            c.rect(x, fz_top - 3, 2, fz_bot - fz_top + 4, hx(P['fence']))
+        return c
 
     # ---------------- quarter pipe (left) --------------------------------
     # The transition curve, the deck height and the coping position are the
@@ -1107,6 +1125,13 @@ def to_png(c, path, zoom=3):
 
 
 if __name__ == '__main__':
+    if '--empty' in sys.argv:
+        c = build(False, sky=False, empty=True)
+        quantize(c)
+        with open(os.path.join(ROOT, 'park-empty.svg'), 'w') as f:
+            f.write(to_svg(c))
+        print('park-empty.svg generated; original park assets preserved')
+        sys.exit(0)
     want_png = '--png' in sys.argv
     # park-*.svg are what the page actually loads: no sky, because the page
     # animates a live day cycle behind them. scene-*.svg are the full-frame
